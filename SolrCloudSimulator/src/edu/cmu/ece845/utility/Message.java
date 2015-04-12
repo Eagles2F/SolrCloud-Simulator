@@ -1,4 +1,4 @@
-package edu.cmu.ece845.core;
+package edu.cmu.ece845.utility;
 
 import java.io.Serializable;
 
