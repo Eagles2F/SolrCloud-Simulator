@@ -9,12 +9,15 @@ public class Message implements Serializable {
 	 */
 	private static final long serialVersionUID = 8708278714887971382L;
 	
-	public enum msgType {
-        nodeInitilization,  //initialization message sent from loadBalancer to the nodes
-        heartbeat, // the heart beat message from node to loadBalancer
-    }
-	
-	msgType messageType;
+	MessageType messageType;
+	public MessageType getMessageType() {
+		return messageType;
+	}
+
+	public void setMessageType(MessageType messageType) {
+		this.messageType = messageType;
+	}
+
 	private String source;
 	private String dest;
 	private DataItem data;
@@ -23,7 +26,7 @@ public class Message implements Serializable {
 	//fields for nodeInitialization
 	private int assignedID;
 	
-	public Message(msgType type) {
+	public Message(MessageType type) {
 		messageType = type;
 	}
 
@@ -67,11 +70,4 @@ public class Message implements Serializable {
 		this.assignedID = assignedID;
 	}
 	
-	public msgType getMessageType() {
-		return messageType;
-	}
-
-	public void setMessageType(msgType messageType) {
-		this.messageType = messageType;
-	}
 }

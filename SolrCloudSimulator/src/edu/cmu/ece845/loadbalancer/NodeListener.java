@@ -6,7 +6,7 @@ import java.io.ObjectOutputStream;
 import java.net.Socket;
 
 import edu.cmu.ece845.utility.Message;
-import edu.cmu.ece845.utility.Message.msgType;
+import edu.cmu.ece845.utility.MessageType;
 
 
 /*
@@ -40,7 +40,7 @@ public class NodeListener implements Runnable{
     }
     
     private void initializeNode() throws IOException{
-    	Message msg = new Message(msgType.nodeInitilization);
+    	Message msg = new Message(MessageType.nodeInitilization);
     	msg.setAssignedID(nodeId);
     	sendToNode(msg);
     }
@@ -59,9 +59,10 @@ public class NodeListener implements Runnable{
 				Message msg = (Message) objInput.readObject();
 				
 				switch(msg.getMessageType()){
+				case heartbeat:
+					break;
 				default:
 					break;
-				
 				}
 			} catch (ClassNotFoundException | IOException e) {
 				e.printStackTrace();
