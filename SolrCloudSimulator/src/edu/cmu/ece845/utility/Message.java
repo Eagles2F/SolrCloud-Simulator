@@ -9,13 +9,25 @@ public class Message implements Serializable {
 	 */
 	private static final long serialVersionUID = 8708278714887971382L;
 	
+	MessageType messageType;
+	public MessageType getMessageType() {
+		return messageType;
+	}
+
+	public void setMessageType(MessageType messageType) {
+		this.messageType = messageType;
+	}
+
 	private String source;
 	private String dest;
 	private DataItem data;
 	private int seqNum; 
-
-	public Message() {
-		
+	
+	//fields for nodeInitialization
+	private int assignedID;
+	
+	public Message(MessageType type) {
+		messageType = type;
 	}
 
 	public String getSource() {
@@ -49,9 +61,13 @@ public class Message implements Serializable {
 	public void setSeqNum(int seqNum) {
 		this.seqNum = seqNum;
 	}
-	
-	
-	
-	
+
+	public int getAssignedID() {
+		return assignedID;
+	}
+
+	public void setAssignedID(int assignedID) {
+		this.assignedID = assignedID;
+	}
 	
 }
