@@ -17,7 +17,7 @@ import java.util.concurrent.ConcurrentHashMap;
 public class NodeHiringServer implements Runnable{
 	
 	public ConcurrentHashMap<Integer,Boolean> nodeStatusMap;
-	public ConcurrentHashMap<Integer,Socket> nodeSocMap; // we assume the port for each node won't change
+	public ConcurrentHashMap<Integer,Socket> nodeSocMap; // we assume the socket for each node won't change
 	public int masterID;
 	public int nodeCount;
 	public int portNum;
@@ -51,11 +51,26 @@ public class NodeHiringServer implements Runnable{
 	
 	private void nodeJoin(Socket soc){
 		//check whether this is a recovery join or not.
-		
+		//now I assume every node is newbie
 		System.out.println("node:"+soc.getInetAddress()+
 				":" + soc.getPort() + " has joined!");
 		nodeSocMap.put(nodeCount, soc);
+		nodeStatusMap.put(nodeCount, true);
+		
+		//start the nodeListener thread
+		try {
+			NodeListener nl = new NodeListener(this,nodeCount, soc);
+			Thread t1 = new Thread(nl);
+			t1.start();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 		nodeCount++;
+	}
+	
+	public int getMasterID(){
+		//return the node who is alive and has the min ID
+		return 0;
 	}
 
 }
