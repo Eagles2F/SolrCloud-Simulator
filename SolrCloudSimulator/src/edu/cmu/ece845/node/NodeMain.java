@@ -1,5 +1,11 @@
 package edu.cmu.ece845.node;
 
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.net.ServerSocket;
+import java.net.Socket;
+
 
 /* 
  * This is the node in the system. Each node will be able to receive a message and send a message
@@ -34,9 +40,40 @@ package edu.cmu.ece845.node;
 
 public class NodeMain {
 
-	public static void main(String[] args) {
+	public static void main(String[] args) {		
+		try {
+	
+			String myPort = args[0];
+			
+			String[] loadBalArgs = args[1].split(":");
+			
+			String loadBalIP = loadBalArgs[0];
+			String loadBalPort = loadBalArgs[1];
+			
+		    System.out.println(loadBalIP);
+			System.out.println(loadBalPort);
+			
+			Socket socketToLB = new Socket(loadBalIP, Integer.parseInt(loadBalPort));
+				
+			new Thread(new NodeClient(socketToLB)).start();			
+			
+			ServerSocket listener = new ServerSocket(Integer.parseInt(myPort));
+			 int id = 0;
+			 try {
+		            while (true) {
+		            	Socket sock = listener.accept();
+		                new Thread(new NodeServer(sock, id++)).start();
+		            }
+		        } finally {
+		            listener.close();
+		            socketToLB.close();
+		        }
+			
+			
+		} catch (IOException e) {
+			e.printStackTrace();
+		} 
 		
-		String port = args[0];
 		
 	}
 }
