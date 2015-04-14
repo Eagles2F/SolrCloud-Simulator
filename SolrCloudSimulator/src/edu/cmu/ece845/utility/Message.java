@@ -25,6 +25,9 @@ public class Message implements Serializable {
 	
 	//fields for nodeInitialization
 	private int assignedID;
+	private int leaderID;
+	
+	
 	
 	public Message(MessageType type) {
 		messageType = type;
