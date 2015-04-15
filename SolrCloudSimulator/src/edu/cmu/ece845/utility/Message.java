@@ -97,5 +97,6 @@ public class Message implements Serializable {
 	public void setLeaderIP(String leaderIP) {
 		this.leaderIP = leaderIP;
 	}
+
 	
 }

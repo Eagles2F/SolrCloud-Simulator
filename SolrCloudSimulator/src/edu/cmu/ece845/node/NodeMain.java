@@ -5,6 +5,10 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.concurrent.LinkedBlockingQueue;
+
+import edu.cmu.ece845.utility.Message;
+import edu.cmu.ece845.utility.MessageType;
 
 
 /* 
@@ -39,8 +43,13 @@ import java.net.Socket;
  */
 
 public class NodeMain {
-
+	
+	public static LinkedBlockingQueue<Message> queue = new LinkedBlockingQueue<Message>();
+	
 	public static void main(String[] args) {		
+		Socket socketToLB = null;
+		
+		
 		try {
 	
 			String myPort = args[0];
@@ -53,27 +62,67 @@ public class NodeMain {
 		    System.out.println(loadBalIP);
 			System.out.println(loadBalPort);
 			
-			Socket socketToLB = new Socket(loadBalIP, Integer.parseInt(loadBalPort));
+			// Connect to LB
+			socketToLB = new Socket(loadBalIP, Integer.parseInt(loadBalPort));
 				
-			new Thread(new NodeClient(socketToLB)).start();			
+			ObjectOutputStream outstream;
+		    ObjectInputStream instream;
 			
-			ServerSocket listener = new ServerSocket(Integer.parseInt(myPort));
-			 int id = 0;
-			 try {
-		            while (true) {
-		            	Socket sock = listener.accept();
-		                new Thread(new NodeServer(sock, id++)).start();
-		            }
-		        } finally {
-		            listener.close();
-		            socketToLB.close();
-		        }
+		    outstream =  new ObjectOutputStream(socketToLB.getOutputStream());
+			instream = new ObjectInputStream(socketToLB.getInputStream());
+			
+			outstream.writeObject(new Message(MessageType.nodeInitilization));
+			
+			Message msg = (Message) instream.readObject();
+			
+			int myID = msg.getAssignedID();
+				
+			// delete the following line and uncomment the below if-else
+			new Thread(new NodeAndLBConn(instream, outstream, myID, queue, false)).start();			
+
+			
+			/*
+			if (myID != msg.getLeaderId()) {
+				new Thread(new NodeAndLBConn(instream, outstream, myID, queue, false)).start();			
+				new Thread(new NodeAndLeaderConn(msg.getLeaderId(), myID, msg.getLeaderIP(), msg.getLeaderPort())).start();
+			}
+			else {
+				new Thread(new NodeAndLBConn(instream, outstream, myID, queue, true)).start();	
+				startServer(myPort);
+			}
+			*/
 			
 			
-		} catch (IOException e) {
+		} catch (IOException | ClassNotFoundException e) {
 			e.printStackTrace();
 		} 
 		
 		
+	}
+	
+	/* start the server if you are the leader*/
+	public static void startServer(String myPort) {
+		
+		ServerSocket listener = null;
+		int id = 0;
+		try {
+			listener = new ServerSocket(Integer.parseInt(myPort));
+			
+	            while (true) {
+	            	Socket sock = listener.accept();
+	                new Thread(new NodeServer(sock, id++, queue)).start();
+	            }
+	        
+		} catch( IOException e) {
+	        	e.printStackTrace();
+	        
+	    } finally { 
+	            try {
+					listener.close();
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+	          
+	        }
 	}
 }
