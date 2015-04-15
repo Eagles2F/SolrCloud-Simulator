@@ -81,7 +81,7 @@ public class NodeMain {
 			new Thread(new NodeAndLBConn(instream, outstream, myID, queue, false)).start();			
 
 			
-	/*
+			/*
 			if (myID != msg.getLeaderId()) {
 				new Thread(new NodeAndLBConn(instream, outstream, myID, queue, false)).start();			
 				new Thread(new NodeAndLeaderConn(msg.getLeaderId(), myID, msg.getLeaderIP(), msg.getLeaderPort())).start();
