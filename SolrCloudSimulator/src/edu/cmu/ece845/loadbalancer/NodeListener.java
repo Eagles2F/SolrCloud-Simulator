@@ -45,6 +45,10 @@ public class NodeListener implements Runnable{
     private void initializeNode() throws IOException{
     	Message msg = new Message(MessageType.nodeInitilization);
     	msg.setAssignedID(nodeId);
+    	int mID = this.hiringServer.masterID;
+    	msg.setLeaderID(mID);
+    	msg.setLeaderPort(this.hiringServer.nodeSocMap.get(mID).getPort());
+    	msg.setLeaderIP(this.hiringServer.nodeSocMap.get(mID).getInetAddress().getHostAddress());
     	sendToNode(msg);
     }
     

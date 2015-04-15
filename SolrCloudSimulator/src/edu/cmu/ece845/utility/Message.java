@@ -26,7 +26,8 @@ public class Message implements Serializable {
 	//fields for nodeInitialization
 	private int assignedID;
 	private int leaderID;
-	
+	private int leaderPort;
+	private String leaderIP;
 	
 	
 	public Message(MessageType type) {
@@ -71,6 +72,30 @@ public class Message implements Serializable {
 
 	public void setAssignedID(int assignedID) {
 		this.assignedID = assignedID;
+	}
+
+	public int getLeaderPort() {
+		return leaderPort;
+	}
+
+	public void setLeaderPort(int leaderPort) {
+		this.leaderPort = leaderPort;
+	}
+
+	public int getLeaderID() {
+		return leaderID;
+	}
+
+	public void setLeaderID(int leaderID) {
+		this.leaderID = leaderID;
+	}
+
+	public String getLeaderIP() {
+		return leaderIP;
+	}
+
+	public void setLeaderIP(String leaderIP) {
+		this.leaderIP = leaderIP;
 	}
 	
 }

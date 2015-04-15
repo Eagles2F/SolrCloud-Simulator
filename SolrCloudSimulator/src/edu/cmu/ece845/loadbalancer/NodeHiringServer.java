@@ -31,6 +31,7 @@ public class NodeHiringServer implements Runnable{
 	}
 	@Override
 	public void run() {
+		System.out.println("NodeHiringServer starts to listen!");
 		ServerSocket serverSoc;
 		try {
 			serverSoc = new ServerSocket(portNum);
