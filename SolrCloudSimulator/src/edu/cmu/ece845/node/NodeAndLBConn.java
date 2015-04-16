@@ -17,20 +17,18 @@ import edu.cmu.ece845.utility.MessageType;
  */
 public class NodeAndLBConn implements Runnable {
 		
-    private int myid;
-    private ObjectOutputStream outstream;
-    private ObjectInputStream instream;
-    private LinkedBlockingQueue<Message> queue;
     private boolean isLeader;
+    private NodeMain nodeMain;
 
-	public NodeAndLBConn(ObjectInputStream in,ObjectOutputStream out, int myID2,
-			LinkedBlockingQueue<Message> q, boolean status) {
-
-			this.myid = myID2;
-			this.instream = in;
-			this.outstream = out;
-			this.queue = q;
-			this.isLeader = status;
+	public NodeAndLBConn(NodeMain nodemain, boolean leaderStatus) {
+		/*
+		this.myid = myID2;
+		this.instream = in;
+		this.outstream = out;
+		this.queue = q;
+		*/
+		this.nodeMain = nodemain;
+		this.isLeader = leaderStatus;
 	}
 
 	@Override
@@ -40,12 +38,12 @@ public class NodeAndLBConn implements Runnable {
 			
 			// Setup the timer for heartbeat
 			Timer timer = new Timer();
-			TimerTask task = new HeartBeat(outstream);
+			TimerTask task = new HeartBeat(nodeMain.outstream);
 			timer.schedule(task, new Date(), 1000);
 			
 					
 			while(true) {
-				Message msg = (Message) instream.readObject();
+				Message msg = (Message) nodeMain.instream.readObject();
 				
 				if (isLeader) {
 					// if msg is write
@@ -54,6 +52,7 @@ public class NodeAndLBConn implements Runnable {
 					
 					// if message is query, look in the local hashmap and file
 					// 
+					
 					
 				} else {
 					// the msg can be that I am the new leader or the leader has changed. 

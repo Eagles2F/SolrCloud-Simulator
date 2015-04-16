@@ -18,12 +18,12 @@ public class NodeServer implements Runnable {
 	private ObjectOutputStream outstream;
     private ObjectInputStream instream;
     private int nodesJoined;
-    private LinkedBlockingQueue<Message> queue;
-	
-	public NodeServer(Socket sock, int num, LinkedBlockingQueue<Message> q) {
-		this.socket = sock;
-		this.queue = q;
-		this.nodesJoined = num;
+    private NodeMain nodeMain;
+    
+	public NodeServer(NodeMain nodemain, Socket sock, int id) {
+		this.socket = sock;	
+		this.nodesJoined = id;
+		this.nodeMain = nodemain;
 	}
 
 	@Override
@@ -37,7 +37,7 @@ public class NodeServer implements Runnable {
 		
 		while(true) {
 			// get msg from the queue. the queue is populated by the other thread which gets the data from the lb.
-			msg = queue.take();
+			msg = nodeMain.queue.take();
 			outstream.writeObject(msg);
 		}
 		// replicas don't send anything to the master
