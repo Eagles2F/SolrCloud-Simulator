@@ -56,12 +56,11 @@ public class NodeAndLeaderConn implements Runnable {
 				FileWriter fw = new FileWriter(nodeMain.logFile.getAbsoluteFile());
 				bw = new BufferedWriter(fw);	
 				DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
-				String content;
+				String content, lastWriteId;
 				
 				// sync me
 				if (!isNewNode) {
 					System.out.println("lets sync");
-					boolean syncNotFinished = true;
 					
 					// filereader to read the last line of the exisiting log file
 					FileReader fr = new FileReader(nodeMain.logFile.getAbsoluteFile());
@@ -76,36 +75,42 @@ public class NodeAndLeaderConn implements Runnable {
 					
 					System.out.println(lastline);
 					String [] tok = lastline.split(" ");
-					String lastWriteId = tok[0];
+					lastWriteId = tok[0];
 					
 					System.out.println("The last written id is " + lastWriteId);
 					br.close();
 					
-					// send sync message to the leader with the last written id
-					Message m = new Message(MessageType.syncwithleader);
-					m.setValue(lastWriteId);
-					outstream.writeObject(m);
-				}
 					
-					// wait for messages
-					while(true) {
-						
-						msg = (Message) instream.readObject();
-						// write msg to file
-						
-						if (msg.getMessageType() == MessageType.syncwithleader) {
-						// pull the message content from the incoming message. It will be type sync
-							//content = msg.getSyncData();
-							//bw.write(content);
-						}
-						else if (msg.getMessageType() == MessageType.writeData) {
-							content = msg.getDataString();
-							bw.write(content);
-						}
-						else {
-							// handle any other message type
-						}
+				}
+				else {
+					lastWriteId = "-1";
+				}
+				
+				// send sync/join message to the leader with the last written id
+				// lastWriteId == -1 if new node. sync and join are same for the replica
+				Message m = new Message(MessageType.syncwithleader);
+				m.setValue(lastWriteId);
+				outstream.writeObject(m);
+					
+				// wait for messages - multithread?
+				while(true) {
+					
+					msg = (Message) instream.readObject();
+					
+					// write msg to file
+					if (msg.getMessageType() == MessageType.syncwithleader) {
+					// pull the message content from the incoming message. It will be type sync
+						content = msg.getDataString();
+						bw.write(content);
 					}
+					else if (msg.getMessageType() == MessageType.writeData) {
+						content = msg.getDataString();
+						bw.write(content);
+					}
+					else {
+						// TODO: handle any other message type
+					}
+				}
 				
 				
 				
