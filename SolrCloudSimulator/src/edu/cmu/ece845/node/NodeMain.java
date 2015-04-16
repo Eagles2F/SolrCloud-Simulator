@@ -79,7 +79,8 @@ public class NodeMain {
 
 			Message m = new Message(MessageType.nodeInitialization);
 			
-			m.setData(new DataItem("nodeInitialization", myPort));
+			m.setKey("nodeInitialization");
+			m.setValue(myPort);
 			
 			outstream.writeObject(m);
 			

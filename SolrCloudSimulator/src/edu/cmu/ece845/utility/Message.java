@@ -20,7 +20,6 @@ public class Message implements Serializable {
 
 	private String source;
 	private String dest;
-	private DataItem data;
 	private int seqNum; 
 	
 	//fields for nodeInitialization
@@ -29,6 +28,9 @@ public class Message implements Serializable {
 	private int leaderPort;
 	private String leaderIP;
 	
+	// dataitem
+	private String key;
+	private String value;
 	
 	public Message(MessageType type) {
 		messageType = type;
@@ -48,14 +50,6 @@ public class Message implements Serializable {
 
 	public void setDest(String dest) {
 		this.dest = dest;
-	}
-
-	public DataItem getData() {
-		return data;
-	}
-
-	public void setData(DataItem data) {
-		this.data = data;
 	}
 
 	public int getSeqNum() {
@@ -98,6 +92,22 @@ public class Message implements Serializable {
 		this.leaderIP = leaderIP;
 	}
 	
+	public String getKey() {
+		return key;
+	}
+
+	public void setKey(String key) {
+		this.key = key;
+	}
+
+	public String getValue() {
+		return value;
+	}
+
+	public void setValue(String value) {
+		this.value = value;
+	}
+
 	@Override
 	public String toString() {
 		return "Message [messageType=" + messageType + ", source=" + source
