@@ -1,6 +1,12 @@
 package edu.cmu.ece845.utility;
 
-public class DataItem {
+import java.io.Serializable;
+
+public class DataItem implements Serializable {
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 8594726794900270717L;
 	private String key;
 	private String value;
 	
