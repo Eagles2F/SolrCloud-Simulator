@@ -29,6 +29,14 @@ public class Message implements Serializable {
 	private String leaderIP;
 	private Boolean is_new; //true - if the node is a newbie.
 	
+	public Boolean getIs_new() {
+		return is_new;
+	}
+
+	public void setIs_new(Boolean is_new) {
+		this.is_new = is_new;
+	}
+
 	// dataitem
 	private String key;
 	private String value;
