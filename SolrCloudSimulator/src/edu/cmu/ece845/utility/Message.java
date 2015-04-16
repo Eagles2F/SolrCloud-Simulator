@@ -29,6 +29,19 @@ public class Message implements Serializable {
 	private String leaderIP;
 	private Boolean is_new; //true - if the node is a newbie.
 	
+	// dataitem
+	private String key;
+	private String value;
+	private String dataString;
+	
+	public String getDataString() {
+		return dataString;
+	}
+
+	public void setDataString(String dataString) {
+		this.dataString = dataString;
+	}
+
 	public Boolean getIs_new() {
 		return is_new;
 	}
@@ -36,10 +49,6 @@ public class Message implements Serializable {
 	public void setIs_new(Boolean is_new) {
 		this.is_new = is_new;
 	}
-
-	// dataitem
-	private String key;
-	private String value;
 	
 	public Message(MessageType type) {
 		messageType = type;

@@ -40,7 +40,8 @@ public class NodeServer implements Runnable {
 			msg = nodeMain.queue.take();
 			outstream.writeObject(msg);
 		}
-		// replicas don't send anything to the master
+		// replicas send syn msg to master
+		// save the replica ids in some table (in the NodeMain class)
 		
 		} catch (IOException | InterruptedException e) {
 			e.printStackTrace();

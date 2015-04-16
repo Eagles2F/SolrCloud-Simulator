@@ -1,11 +1,18 @@
 package edu.cmu.ece845.node;
 
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.concurrent.LinkedBlockingQueue;
 
 import edu.cmu.ece845.utility.Message;
@@ -50,10 +57,10 @@ import edu.cmu.ece845.utility.MessageType;
 public class NodeMain {
 	
 	public LinkedBlockingQueue<Message> queue = new LinkedBlockingQueue<Message>(); 
-	public String logfileName = "";
 	public int myID;
 	public ObjectOutputStream outstream;
 	public ObjectInputStream instream;
+	public File logFile;
 	
 	public void runNodeMain(String args[]) {
 		
@@ -62,7 +69,10 @@ public class NodeMain {
 		try {
 	
 			String myPort = args[0];
-			logfileName = "logfile_" + myPort;
+			
+			// make a new file
+			logFile = new File("logfile_" + myPort + ".txt");
+			
 			
 			String[] loadBalArgs = args[1].split(":");
 			
@@ -99,7 +109,11 @@ public class NodeMain {
 
 			// check if I am old guy or existing guy. If I am oldguy, I am I have the file and i need to sync
 			 if(msg.getIs_new()) {
-				// File file = new File(logfileName + ".txt");
+				 
+				 if (logFile.createNewFile())
+					{
+						System.out.println("file successfully created");
+					}
 			 }
 			
 		/*	
