@@ -20,16 +20,20 @@ public class NodeServer implements Runnable {
     private ObjectInputStream instream;
     private int nodesJoined;
     private NodeMain nodeMain;
+    private LinkedBlockingQueue<Message> localQueue;
+    private int replicaid;
     
 	public NodeServer(NodeMain nodemain, Socket sock, int id) {
 		this.socket = sock;	
 		this.nodesJoined = id;
 		this.nodeMain = nodemain;
+		this.localQueue = new LinkedBlockingQueue<Message>();
 	}
 
 	@Override
 	public void run() {
 		try {
+		
 		System.out.println("connection established " + socket.getLocalPort() + " remote " + socket.getPort());
 		outstream = new ObjectOutputStream(socket.getOutputStream());
 		instream = new ObjectInputStream(socket.getInputStream());
@@ -42,8 +46,10 @@ public class NodeServer implements Runnable {
 		
 		if (msg.getMessageType() == MessageType.syncwithleader) 
 		{
+			nodeMain.addReplicaQueueinQueueList(localQueue);
 			String id = msg.getValue();
-			
+			replicaid = msg.getAssignedID();
+			nodeMain.queueHashMap.put(replicaid, localQueue);
 			// TODO:  save the replica ids in some table (in the NodeMain class)
 			
 			if (Integer.parseInt(id) != -1)
@@ -61,7 +67,8 @@ public class NodeServer implements Runnable {
 		
 		while(true) {
 			// get msg from the queue. the queue is populated by the other thread which gets the data from the lb.
-			msg = nodeMain.queue.take();
+			msg = localQueue.take();
+			System.out.println("msg received " + msg.getValue());
 			outstream.writeObject(msg);
 		}
 		
@@ -69,6 +76,10 @@ public class NodeServer implements Runnable {
 		
 		} catch (IOException | InterruptedException | ClassNotFoundException e) {
 			e.printStackTrace();
+			// remove if the node dies - 
+			System.out.println("Thread died. This thread was of the leader and replica id: " + replicaid + " was connected to it");
+			nodeMain.queueList.remove(localQueue);
+			nodeMain.queueHashMap.remove(replicaid);
 		}
 	}
 }

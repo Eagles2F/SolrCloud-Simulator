@@ -9,6 +9,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.concurrent.LinkedBlockingQueue;
 
 import edu.cmu.ece845.utility.Message;
 import edu.cmu.ece845.utility.MessageType;
@@ -51,37 +52,45 @@ public class NodeAndLBConn implements Runnable {
 			while(true) {
 				msg = (Message) nodeMain.instream.readObject();
 				
-				if (isLeader) {
+				if (isLeader && msg.getMessageType() == MessageType.writeData) {
 					// if msg is write
 					// leader, then write to local file and forward to replicas 
-					
-					content =  msg.getSeqNum() + " " + dateFormat.format(new Date()) + 
+					System.out.println("Normal write message");
+			/*		content =  msg.getSeqNum() + " " + dateFormat.format(new Date()) + 
 							" key:" + msg.getKey() + " value:" + msg.getValue();
 					bw.write(content);
 					
 					// the message is stored in data and this string data is to be stored in replicas
 					msg.setDataString(content);
 					
-					// put in the queue. The server will push send the data
-					nodeMain.queue.put(msg);
+					// put the message in all the queues. Each queue belongs to one replica. The server will push send the data
+					for (LinkedBlockingQueue<Message> q : nodeMain.queueList)
+						q.put(msg);
 					// TODO: Write in the hashmap for local caching
 					
 					// if message is query, look in the local hashmap and file
-					
+			*/		
 				
 					
 				} else {
 					// the msg can be that I am the new leader or the leader has changed. 
 					// So, add logic to respond to these kinds of messages
-				
-				
+					if (msg.getMessageType() == MessageType.leaderReelection) {
+						System.out.println("Leader re-election msg");
+						System.out.println("My id is " + nodeMain.myID);
+						System.out.println(msg.toString());
+						System.out.println("My id is " + nodeMain.myID);
+					}
+					else {
+						System.out.println("shouldn't reach here");
+					}
 				}
 				
 				// Do something with the msg object. 
 							
 			}
 					        
-		} catch (IOException | ClassNotFoundException | InterruptedException e) {
+		} catch (IOException | ClassNotFoundException e) {
 				e.printStackTrace();
 		}
 	    

@@ -6,6 +6,9 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.ArrayList;
+import java.util.Hashtable;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.LinkedBlockingQueue;
 
 import edu.cmu.ece845.utility.Message;
@@ -49,11 +52,17 @@ import edu.cmu.ece845.utility.MessageType;
  */
 public class NodeMain {
 	
-	public LinkedBlockingQueue<Message> queue = new LinkedBlockingQueue<Message>(); 
+	public ArrayList<LinkedBlockingQueue<Message>> queueList; 
 	public int myID;
 	public ObjectOutputStream outstream;
 	public ObjectInputStream instream;
 	public File logFile;
+	public ConcurrentHashMap<Integer, LinkedBlockingQueue<Message>> queueHashMap;
+	
+	public NodeMain () {
+		queueList = new ArrayList<LinkedBlockingQueue<Message>>();
+		queueHashMap = new ConcurrentHashMap<Integer, LinkedBlockingQueue<Message>>();
+	}
 	
 	public void runNodeMain(String args[]) {
 		
@@ -66,9 +75,8 @@ public class NodeMain {
 			// make a new file
 			logFile = new File("logfile_" + myPort + ".txt");
 			
-			
+			// get details of load balancer
 			String[] loadBalArgs = args[1].split(":");
-			
 			String loadBalIP = loadBalArgs[0];
 			String loadBalPort = loadBalArgs[1];
 			
@@ -81,33 +89,31 @@ public class NodeMain {
 		    outstream =  new ObjectOutputStream(socketToLB.getOutputStream());
 			instream = new ObjectInputStream(socketToLB.getInputStream());
 
+			// introduce yourself to the loadbalancer  
 			Message m = new Message(MessageType.nodeInitialization);
-			
 			m.setKey("nodeInitialization");
 			m.setValue(myPort);
-			
-			// tell the loadbalancer that you are joining
 			outstream.writeObject(m);
 			
-			// get the reply and parse it
+			// get the id from the loadbalancer. Also get information about the leader
 			Message msg = (Message) instream.readObject();
 			
 			myID = msg.getAssignedID();
+			System.out.println(msg.toString());	
 			
-			System.out.println(msg.toString());
-				
-			// delete the following line and uncomment the below if-else
-			new Thread(new NodeAndLBConn(this, false)).start();			
-		
-
 			// check if I am old guy or existing guy. If I am oldguy, I am I have the file and i need to sync
-			 if(msg.getIs_new()) {
-				 
+			if(msg.getIs_new()) {
+				
 				 if (logFile.createNewFile())
 					{
 						System.out.println("file successfully created");
 					}
 			 }
+		
+			// delete the following line and uncomment the below if-else
+			new Thread(new NodeAndLBConn(this, false)).start();			
+			
+
 			
 		/*	
 			if (myID != msg.getLeaderID()) {
@@ -152,6 +158,10 @@ public class NodeMain {
 				}
 	          
 	        }
+	}
+	
+	public void addReplicaQueueinQueueList(LinkedBlockingQueue<Message> q) {
+		this.queueList.add(q);
 	}
 	
 	public static void main(String[] args) {
