@@ -75,7 +75,7 @@ public class NodeMain {
 		    outstream =  new ObjectOutputStream(socketToLB.getOutputStream());
 			instream = new ObjectInputStream(socketToLB.getInputStream());
 			
-			outstream.writeObject(new Message(MessageType.nodeInitilization));
+			outstream.writeObject(new Message(MessageType.nodeInitialization));
 			
 			Message msg = (Message) instream.readObject();
 			

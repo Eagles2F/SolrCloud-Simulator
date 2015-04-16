@@ -18,6 +18,7 @@ public class NodeHiringServer implements Runnable{
 	
 	public ConcurrentHashMap<Integer,Boolean> nodeStatusMap;
 	public ConcurrentHashMap<Integer,Socket> nodeSocMap; // we assume the socket for each node won't change
+	public ConcurrentHashMap<Integer, Integer> nodeComPortMap; // the port which the node is using to listening to other nodes
 	public int masterID;
 	public int nodeCount;
 	public int portNum;

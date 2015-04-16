@@ -44,11 +44,11 @@ public class NodeListener implements Runnable{
     
     // initialization messages to the newbie node
     private void initializeNode() throws IOException{
-    	Message msg = new Message(MessageType.nodeInitilization);
+    	Message msg = new Message(MessageType.nodeInitialization);
     	msg.setAssignedID(nodeId);
     	int mID = this.hiringServer.masterID;
     	msg.setLeaderID(mID);
-    	msg.setLeaderPort(this.hiringServer.nodeSocMap.get(mID).getPort());
+    	msg.setLeaderPort(this.hiringServer.nodeComPortMap.get(mID));
     	msg.setLeaderIP(this.hiringServer.nodeSocMap.get(mID).getInetAddress().getHostAddress());
     	sendToNode(msg);
     }
@@ -62,6 +62,11 @@ public class NodeListener implements Runnable{
     	timer.reset();
     }
 
+    private void handleInit(Message msg){
+    	int port=Integer.valueOf(msg.getData().getValue());
+    	System.out.println("the node:"+this.nodeId+" is listening on port:"+port +" for other nodes");
+    	this.hiringServer.nodeComPortMap.put(this.nodeId, port);
+    }
 	@Override
 	public void run() {
 		// send initialization message to the new Node
@@ -85,6 +90,9 @@ public class NodeListener implements Runnable{
 				Message msg = (Message) objInput.readObject();
 				
 				switch(msg.getMessageType()){
+				case nodeInitialization:
+					handleInit(msg);
+					break;
 				case heartbeat:
 					handleHeartbeat(timer,msg);
 					break;
