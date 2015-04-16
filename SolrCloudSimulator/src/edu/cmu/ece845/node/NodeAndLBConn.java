@@ -35,28 +35,30 @@ public class NodeAndLBConn implements Runnable {
 	public void run() {
 		 try {
 		
-			// Setup the timer for heartbeat
+			// Setup the timer for heartbeat. Currently it is 1 sec
 			Timer timer = new Timer();
 			TimerTask task = new HeartBeat(nodeMain.outstream);
 			timer.schedule(task, new Date(), 1000);
 			
-			DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
 			String content;
+			DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
 			
+			// if I am the leader, then open file for writing
 			if (isLeader) {
 				
 				fw = new FileWriter(nodeMain.logFile.getAbsoluteFile());
 				bw = new BufferedWriter(fw);	
 			}
 			
+			// get the message from loadbalancer to write
 			while(true) {
 				msg = (Message) nodeMain.instream.readObject();
 				
 				if (isLeader && msg.getMessageType() == MessageType.writeData) {
-					// if msg is write
-					// leader, then write to local file and forward to replicas 
+					// if msg is write - then write to local file and forward to replicas 
 					System.out.println("Normal write message");
-			/*		content =  msg.getSeqNum() + " " + dateFormat.format(new Date()) + 
+			
+					content =  msg.getSeqNum() + " " + dateFormat.format(new Date()) + 
 							" key:" + msg.getKey() + " value:" + msg.getValue();
 					bw.write(content);
 					
@@ -66,11 +68,14 @@ public class NodeAndLBConn implements Runnable {
 					// put the message in all the queues. Each queue belongs to one replica. The server will push send the data
 					for (LinkedBlockingQueue<Message> q : nodeMain.queueList)
 						q.put(msg);
+					
 					// TODO: Write in the hashmap for local caching
 					
-					// if message is query, look in the local hashmap and file
-			*/		
-				
+					
+				} else if (isLeader && msg.getMessageType() == MessageType.queryData) {
+					
+					// query the data from local hashamp 
+					// message is query, look in the local hashmap and file
 					
 				} else {
 					// the msg can be that I am the new leader or the leader has changed. 
@@ -79,7 +84,9 @@ public class NodeAndLBConn implements Runnable {
 						System.out.println("Leader re-election msg");
 						System.out.println("My id is " + nodeMain.myID);
 						System.out.println(msg.toString());
-						System.out.println("My id is " + nodeMain.myID);
+						
+						// TODO: Take action of what happens when leader re-election happens
+						// connect to new leader. If I am the new leader, then how to do stuff?
 					}
 					else {
 						System.out.println("shouldn't reach here");
@@ -90,7 +97,7 @@ public class NodeAndLBConn implements Runnable {
 							
 			}
 					        
-		} catch (IOException | ClassNotFoundException e) {
+		} catch (IOException | ClassNotFoundException | InterruptedException e) {
 				e.printStackTrace();
 		}
 	    

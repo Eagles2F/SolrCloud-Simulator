@@ -106,26 +106,23 @@ public class NodeMain {
 				
 				 if (logFile.createNewFile())
 					{
-						System.out.println("file successfully created");
+						System.out.println("log file successfully created");
 					}
 			 }
 		
 			// delete the following line and uncomment the below if-else
-			new Thread(new NodeAndLBConn(this, false)).start();			
-			
-
-			
-		/*	
+			//new Thread(new NodeAndLBConn(this, false)).start();			
+	
+			// if I am not the leader, then start the LB connection thread and leader connection thread
 			if (myID != msg.getLeaderID()) {
 				new Thread(new NodeAndLBConn(this, false)).start();			
 				new Thread(new NodeAndLeaderConn(this, msg.getLeaderID(), msg.getLeaderIP(), msg.getLeaderPort(), msg.getIs_new())).start();
 			}
+			// if I am the leader, then start LB connection thread and start the server to listen for incoming replica connections
 			else {
 				new Thread(new NodeAndLBConn(this, true)).start();	
 				startServer(myPort);
 			}
-		
-		*/
 			
 		} catch (IOException | ClassNotFoundException e) {
 			e.printStackTrace();
@@ -144,6 +141,7 @@ public class NodeMain {
 			
 	            while (true) {
 	            	Socket sock = listener.accept();
+	            	// Each new replica is served in a new thread
 	                new Thread(new NodeServer(this, sock, id++)).start();
 	            }
 	        
@@ -160,6 +158,7 @@ public class NodeMain {
 	        }
 	}
 	
+	// Method to add each replica thread's linkedblockingqueue to the master list
 	public void addReplicaQueueinQueueList(LinkedBlockingQueue<Message> q) {
 		this.queueList.add(q);
 	}

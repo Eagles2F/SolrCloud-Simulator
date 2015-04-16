@@ -34,14 +34,14 @@ public class NodeServer implements Runnable {
 	public void run() {
 		try {
 		
+		// Replica joined
 		System.out.println("connection established " + socket.getLocalPort() + " remote " + socket.getPort());
 		outstream = new ObjectOutputStream(socket.getOutputStream());
 		instream = new ObjectInputStream(socket.getInputStream());
 		System.out.println("thread " + nodesJoined +" " );
 		Message msg;
 		
-		// for the first time, the node will send the sync msg
-		// replicas send syn msg to master
+		// for the first time, the node will send the sync msg -  replica send syn msg to master
 		msg = (Message) instream.readObject();
 		
 		if (msg.getMessageType() == MessageType.syncwithleader) 
@@ -49,30 +49,36 @@ public class NodeServer implements Runnable {
 			nodeMain.addReplicaQueueinQueueList(localQueue);
 			String id = msg.getValue();
 			replicaid = msg.getAssignedID();
-			nodeMain.queueHashMap.put(replicaid, localQueue);
-			// TODO:  save the replica ids in some table (in the NodeMain class)
 			
-			if (Integer.parseInt(id) != -1)
+			// Save the replica ids in some table (in the NodeMain class)
+			nodeMain.queueHashMap.put(replicaid, localQueue);
+			
+			// new replica. So sync from beginning
+			if (Integer.parseInt(id) == -1)
 			{
-				System.out.println("sync required");
-				// Do sync in another thread?
+				System.out.println("sync required from starting");
+				// TODO: Read the file and sync from beginning
+				
+			} // restarted replica. So sync from some id
+			else {
+				System.out.println("sync required from id: " + Integer.parseInt(id));
 				// TODO: Read the file and find the id to send the remaining ids to the replica
 			}
 		}
 		
 		else {
-			// do something else
+			// do something else - shouldn't reach here
 		}
 		
 		
 		while(true) {
-			// get msg from the queue. the queue is populated by the other thread which gets the data from the lb.
+			// get msg from the queue. the queue is populated by the LB thread which gets the data from the LB.
 			msg = localQueue.take();
 			System.out.println("msg received " + msg.getValue());
+			
+			// write the data to replica
 			outstream.writeObject(msg);
 		}
-		
-		
 		
 		} catch (IOException | InterruptedException | ClassNotFoundException e) {
 			e.printStackTrace();

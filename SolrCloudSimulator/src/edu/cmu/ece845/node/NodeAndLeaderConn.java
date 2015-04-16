@@ -8,9 +8,6 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 
 import edu.cmu.ece845.utility.Message;
 import edu.cmu.ece845.utility.MessageType;
@@ -21,7 +18,6 @@ import edu.cmu.ece845.utility.MessageType;
  */
 public class NodeAndLeaderConn implements Runnable {
 
-	private int myID;
 	private int leaderID;
 	private int leaderPort;
 	private String leaderIP;
@@ -46,21 +42,22 @@ public class NodeAndLeaderConn implements Runnable {
 		
 		
 		 try {
-			 
+			 	// i am a replica. So connect to the leader.
 				socket = new Socket(leaderIP, leaderPort);
 				
+				// initialize streams
 				ObjectOutputStream outstream =  new ObjectOutputStream(socket.getOutputStream());
 				ObjectInputStream instream = new ObjectInputStream(socket.getInputStream());	
 				 
 				// initialize the files stuff
 				FileWriter fw = new FileWriter(nodeMain.logFile.getAbsoluteFile());
 				bw = new BufferedWriter(fw);	
-				DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
 				String content, lastWriteId;
 				
-				// sync me
+				// sync the dead node
 				if (!isNewNode) {
-					System.out.println("lets sync");
+					
+					System.out.println("lets re sync this  dead node");
 					
 					// filereader to read the last line of the exisiting log file
 					FileReader fr = new FileReader(nodeMain.logFile.getAbsoluteFile());
@@ -77,12 +74,13 @@ public class NodeAndLeaderConn implements Runnable {
 					String [] tok = lastline.split(" ");
 					lastWriteId = tok[0];
 					
+					// get the last id to sync after
 					System.out.println("The last written id is " + lastWriteId);
 					br.close();
 					
 					
 				}
-				else {
+				else { // I am a new node. So my last id is -1.
 					lastWriteId = "-1";
 				}
 				
@@ -95,6 +93,7 @@ public class NodeAndLeaderConn implements Runnable {
 				// wait for messages - multithread?
 				while(true) {
 					
+					// message from leader
 					msg = (Message) instream.readObject();
 					
 					// write msg to file
@@ -108,14 +107,11 @@ public class NodeAndLeaderConn implements Runnable {
 						bw.write(content);
 					}
 					else {
-						// TODO: handle any other message type
+						// TODO: handle any other message type - shouldnt come here
 					}
 				}
-				
-				
-				
-				
-			} catch ( ClassNotFoundException | IOException e) {
+	
+		 	} catch ( ClassNotFoundException | IOException e) {
 				e.printStackTrace();
 			} finally {
 				try {
