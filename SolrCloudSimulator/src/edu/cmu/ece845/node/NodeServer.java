@@ -8,6 +8,10 @@ import java.util.concurrent.LinkedBlockingQueue;
 
 import edu.cmu.ece845.utility.Message;
 
+/**
+ * @author darshs
+ *
+ */
 public class NodeServer implements Runnable {
 
 	private Socket socket;

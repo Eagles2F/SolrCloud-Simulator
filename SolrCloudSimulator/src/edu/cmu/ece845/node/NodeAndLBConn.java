@@ -1,11 +1,8 @@
 package edu.cmu.ece845.node;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-import java.net.Socket;
 import java.util.Date;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -14,6 +11,10 @@ import java.util.concurrent.LinkedBlockingQueue;
 import edu.cmu.ece845.utility.Message;
 import edu.cmu.ece845.utility.MessageType;
 
+/**
+ * @author darshs
+ *
+ */
 public class NodeAndLBConn implements Runnable {
 		
     private int myid;
@@ -84,7 +85,7 @@ class HeartBeat extends TimerTask {
 
 	@Override
 	public void run() {
-		System.out.println("hello");
+		
 		try {
 			outstream.writeObject(new Message(MessageType.heartbeat));
 		

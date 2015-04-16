@@ -42,6 +42,10 @@ import edu.cmu.ece845.utility.MessageType;
  * Process the data from the blocking queue.
  */
 
+/**
+ * @author darshs
+ *
+ */
 public class NodeMain {
 	
 	public static LinkedBlockingQueue<Message> queue = new LinkedBlockingQueue<Message>();
@@ -76,21 +80,22 @@ public class NodeMain {
 			Message msg = (Message) instream.readObject();
 			
 			int myID = msg.getAssignedID();
+			
+			
 				
 			// delete the following line and uncomment the below if-else
 			new Thread(new NodeAndLBConn(instream, outstream, myID, queue, false)).start();			
 
 			
-			/*
-			if (myID != msg.getLeaderId()) {
+			if (myID != msg.getLeaderID()) {
 				new Thread(new NodeAndLBConn(instream, outstream, myID, queue, false)).start();			
-				new Thread(new NodeAndLeaderConn(msg.getLeaderId(), myID, msg.getLeaderIP(), msg.getLeaderPort())).start();
+				new Thread(new NodeAndLeaderConn(msg.getLeaderID(), myID, msg.getLeaderIP(), msg.getLeaderPort())).start();
 			}
 			else {
 				new Thread(new NodeAndLBConn(instream, outstream, myID, queue, true)).start();	
 				startServer(myPort);
 			}
-			*/
+		
 			
 			
 		} catch (IOException | ClassNotFoundException e) {
