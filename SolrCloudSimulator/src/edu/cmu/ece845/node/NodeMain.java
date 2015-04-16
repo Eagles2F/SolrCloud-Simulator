@@ -92,7 +92,10 @@ public class NodeMain {
 			// delete the following line and uncomment the below if-else
 			new Thread(new NodeAndLBConn(instream, outstream, myID, queue, false)).start();			
 
-	/*		
+			// check if I am old guy or existing guy. If I am oldguy, I am I have the file and i need to sync
+			// create a file
+			
+		/*		
 			if (myID != msg.getLeaderID()) {
 				new Thread(new NodeAndLBConn(instream, outstream, myID, queue, false)).start();			
 				new Thread(new NodeAndLeaderConn(msg.getLeaderID(), myID, msg.getLeaderIP(), msg.getLeaderPort())).start();
