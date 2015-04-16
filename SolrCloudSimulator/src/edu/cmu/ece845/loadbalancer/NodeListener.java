@@ -44,7 +44,7 @@ public class NodeListener implements Runnable{
     
     // initialization messages to the newbie node
     private void initializeNode() throws IOException{
-    	Message msg = new Message(MessageType.nodeInitilization);
+    	Message msg = new Message(MessageType.nodeInitialization);
     	msg.setAssignedID(nodeId);
     	int mID = this.hiringServer.masterID;
     	msg.setLeaderID(mID);
