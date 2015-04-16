@@ -132,20 +132,53 @@ public class NodeListener implements Runnable{
 				}
 			} catch (EOFException e1){
 				System.out.println("node "+this.nodeId + "died!");
+				
+				this.hiringServer.nodeStatusMap.remove(this.nodeId);
+				this.hiringServer.nodeSocMap.remove(this.nodeId);
+				this.hiringServer.nodeListenerMap.remove(this.nodeId);
 				//if the dead node is the leader, we should do a re-election
 				if(this.nodeId == this.hiringServer.masterID){
-					this.hiringServer.masterID++; // choose the min id in healthy nodes
+					reelect();// choose the min id in healthy nodes
+					notifyNewMaster();
 					//notify all the nodes there is a new leader
 					
 				}
-				this.hiringServer.nodeStatusMap.remove(this.nodeId);
-				this.hiringServer.nodeSocMap.remove(this.nodeId);
 				return ;
 			} catch (ClassNotFoundException | IOException e) {
 				e.printStackTrace();
 			} 
 	
 		}
+	}
+	
+	//this function will notify other nodes about the new master
+	public void notifyNewMaster(){
+		Set<Integer> keyset = this.hiringServer.nodeStatusMap.keySet();
+		for(int key : keyset){
+			Message msg = new Message(MessageType.leaderReelection);
+			int mID = this.hiringServer.masterID;
+			msg.setLeaderID(mID);
+			msg.setLeaderPort(this.hiringServer.nodeComPortMap.get(mID));
+	    	msg.setLeaderIP(this.hiringServer.nodeSocMap.get(mID).getInetAddress().getHostAddress());
+			try {
+				this.hiringServer.nodeListenerMap.get(key).sendToNode(msg);
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+		
+	}
+	//this function will re-elect the new master
+	public void reelect(){
+		Set<Integer> keyset = this.hiringServer.nodeStatusMap.keySet();
+		int min = 99999;
+		for(int key:keyset){
+			if(min>key){
+				min = key;
+			}
+		}
+		this.hiringServer.masterID = min;
 	}
 	
 	public int getNodeID(){
