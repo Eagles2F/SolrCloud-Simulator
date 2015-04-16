@@ -1,5 +1,6 @@
 package edu.cmu.ece845.node;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -48,15 +49,20 @@ import edu.cmu.ece845.utility.MessageType;
  */
 public class NodeMain {
 	
-	public static LinkedBlockingQueue<Message> queue = new LinkedBlockingQueue<Message>();
+	public LinkedBlockingQueue<Message> queue = new LinkedBlockingQueue<Message>(); 
+	public String logfileName = "";
+	public int myID;
+	public ObjectOutputStream outstream;
+	public ObjectInputStream instream;
 	
-	public static void main(String[] args) {		
+	public void runNodeMain(String args[]) {
+		
 		Socket socketToLB = null;
-		
-		
+	
 		try {
 	
 			String myPort = args[0];
+			logfileName = "logfile_" + myPort;
 			
 			String[] loadBalArgs = args[1].split(":");
 			
@@ -68,44 +74,45 @@ public class NodeMain {
 			
 			// Connect to LB
 			socketToLB = new Socket(loadBalIP, Integer.parseInt(loadBalPort));
-				
-			ObjectOutputStream outstream;
-		    ObjectInputStream instream;
 			
 		    outstream =  new ObjectOutputStream(socketToLB.getOutputStream());
 			instream = new ObjectInputStream(socketToLB.getInputStream());
-			
 
 			Message m = new Message(MessageType.nodeInitialization);
 			
 			m.setKey("nodeInitialization");
 			m.setValue(myPort);
 			
+			// tell the loadbalancer that you are joining
 			outstream.writeObject(m);
 			
+			// get the reply and parse it
 			Message msg = (Message) instream.readObject();
 			
-			int myID = msg.getAssignedID();
+			myID = msg.getAssignedID();
 			
 			System.out.println(msg.toString());
 				
 			// delete the following line and uncomment the below if-else
-			new Thread(new NodeAndLBConn(instream, outstream, myID, queue, false)).start();			
+			new Thread(new NodeAndLBConn(this, false)).start();			
+		
 
 			// check if I am old guy or existing guy. If I am oldguy, I am I have the file and i need to sync
-			// create a file
+			 if(msg.getIs_new()) {
+				// File file = new File(logfileName + ".txt");
+			 }
 			
-		/*		
+		/*	
 			if (myID != msg.getLeaderID()) {
-				new Thread(new NodeAndLBConn(instream, outstream, myID, queue, false)).start();			
-				new Thread(new NodeAndLeaderConn(msg.getLeaderID(), myID, msg.getLeaderIP(), msg.getLeaderPort())).start();
+				new Thread(new NodeAndLBConn(this, false)).start();			
+				new Thread(new NodeAndLeaderConn(this, msg.getLeaderID(), msg.getLeaderIP(), msg.getLeaderPort(), msg.getIs_new())).start();
 			}
 			else {
-				new Thread(new NodeAndLBConn(instream, outstream, myID, queue, true)).start();	
+				new Thread(new NodeAndLBConn(this, true)).start();	
 				startServer(myPort);
 			}
+		
 		*/
-			
 			
 		} catch (IOException | ClassNotFoundException e) {
 			e.printStackTrace();
@@ -115,7 +122,7 @@ public class NodeMain {
 	}
 	
 	/* start the server if you are the leader*/
-	public static void startServer(String myPort) {
+	private void startServer(String myPort) {
 		
 		ServerSocket listener = null;
 		int id = 0;
@@ -124,7 +131,7 @@ public class NodeMain {
 			
 	            while (true) {
 	            	Socket sock = listener.accept();
-	                new Thread(new NodeServer(sock, id++, queue)).start();
+	                new Thread(new NodeServer(this, sock, id++)).start();
 	            }
 	        
 		} catch( IOException e) {
@@ -138,5 +145,12 @@ public class NodeMain {
 				}
 	          
 	        }
+	}
+	
+	public static void main(String[] args) {
+		
+		NodeMain nm = new NodeMain();
+		nm.runNodeMain(args);
+		
 	}
 }
