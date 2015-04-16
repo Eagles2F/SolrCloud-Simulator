@@ -19,6 +19,8 @@ public class NodeHiringServer implements Runnable{
 	public ConcurrentHashMap<Integer,Boolean> nodeStatusMap;
 	public ConcurrentHashMap<Integer,Socket> nodeSocMap; // we assume the socket for each node won't change
 	public ConcurrentHashMap<Integer, Integer> nodeComPortMap; // the port which the node is using to listening to other nodes
+	public ConcurrentHashMap<Integer, NodeListener> nodeListenerMap;
+	
 	public int masterID;
 	public int nodeCount;
 	public int portNum;
@@ -32,6 +34,7 @@ public class NodeHiringServer implements Runnable{
 		this.nodeStatusMap = new ConcurrentHashMap<Integer, Boolean>();
 		this.nodeSocMap = new ConcurrentHashMap<Integer, Socket>();
 		this.nodeComPortMap = new ConcurrentHashMap<Integer, Integer>();
+		this.nodeListenerMap = new ConcurrentHashMap<Integer, NodeListener>();
 	}
 	
 	@Override
@@ -66,6 +69,7 @@ public class NodeHiringServer implements Runnable{
 		//start the nodeListener thread
 		try {
 			NodeListener nl = new NodeListener(this,nodeCount, soc);
+			this.nodeListenerMap.put(nl.getNodeID(), nl);
 			Thread t1 = new Thread(nl);
 			t1.start();
 		} catch (IOException e) {
