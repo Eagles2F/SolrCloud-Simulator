@@ -72,7 +72,6 @@ public class LoadBalancerMain {
 		while(it.hasNext()){
 			Entry<Integer, Boolean> e = (Entry<Integer, Boolean>) it.next();
 			System.out.println("nodeID:" + e.getKey() + " is " + e.getValue());
-			it.remove();
 		}
 	}
 	// shut down the loadBalancer and notify others about this event.

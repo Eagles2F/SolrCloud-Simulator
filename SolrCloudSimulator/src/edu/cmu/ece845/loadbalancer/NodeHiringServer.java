@@ -31,6 +31,7 @@ public class NodeHiringServer implements Runnable{
 		masterID = 0; 
 		this.nodeStatusMap = new ConcurrentHashMap<Integer, Boolean>();
 		this.nodeSocMap = new ConcurrentHashMap<Integer, Socket>();
+		this.nodeComPortMap = new ConcurrentHashMap<Integer, Integer>();
 	}
 	
 	@Override

@@ -27,6 +27,7 @@ public class Message implements Serializable {
 	private int leaderID;
 	private int leaderPort;
 	private String leaderIP;
+	private Boolean is_new; //true - if the node is a newbie.
 	
 	// dataitem
 	private String key;

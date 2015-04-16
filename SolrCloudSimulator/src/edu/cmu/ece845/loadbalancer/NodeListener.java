@@ -57,13 +57,18 @@ public class NodeListener implements Runnable{
      * This function will update the state of node status on LB to 'active'.
      */
     private void handleHeartbeat(HeartbeatTimer timer, Message msg){
-    	System.out.println("heartbeat:" + this.nodeId);
+    //	System.out.println("heartbeat:" + this.nodeId);
     	this.hiringServer.nodeStatusMap.replace(this.nodeId, false, true);
     	timer.reset();
     }
 
     private void handleInit(Message msg){
     	int port=Integer.valueOf(msg.getValue());
+    	
+    	//check this port
+    	
+    	//change the maps
+    	
     	System.out.println("the node:"+this.nodeId+" is listening on port:"+port +" for other nodes");
     	this.hiringServer.nodeComPortMap.put(this.nodeId, port);
     	
