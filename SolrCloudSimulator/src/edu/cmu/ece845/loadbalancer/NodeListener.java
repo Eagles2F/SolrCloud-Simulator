@@ -63,18 +63,21 @@ public class NodeListener implements Runnable{
     }
 
     private void handleInit(Message msg){
-    	int port=Integer.valueOf(msg.getData().getValue());
+    	int port=Integer.valueOf(msg.getValue());
     	System.out.println("the node:"+this.nodeId+" is listening on port:"+port +" for other nodes");
     	this.hiringServer.nodeComPortMap.put(this.nodeId, port);
+    	
+    	//send ack
+    	// send initialization message to the new Node
+    			try {
+    				initializeNode();
+    			} catch (IOException e) {
+    				e.printStackTrace();
+    			}
     }
 	@Override
 	public void run() {
-		// send initialization message to the new Node
-		try {
-			initializeNode();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
+		
 		
 		HeartbeatTimer timer = new HeartbeatTimer(this,3000){   // time unit: millisecond
 			public void timeout(){
