@@ -3,8 +3,8 @@ package edu.cmu.ece845.loadbalancer;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.util.Iterator;
 import java.util.Map.Entry;
+import java.util.Set;
 
 import edu.cmu.ece845.utility.LBConfiguration;
 
@@ -68,10 +68,9 @@ public class LoadBalancerMain {
 
 	
 	private void handleLS(){
-		Iterator it = this.nodeHiringServer.nodeStatusMap.entrySet().iterator();
-		while(it.hasNext()){
-			Entry<Integer, Boolean> e = (Entry<Integer, Boolean>) it.next();
-			System.out.println("nodeID:" + e.getKey() + " is " + e.getValue());
+		final Set<Entry<Integer, Boolean>> entries = this.nodeHiringServer.nodeStatusMap.entrySet();
+		for(Entry<Integer, Boolean> entry : entries){
+			System.out.println("nodeID:" + entry.getKey() + " is " + entry.getValue());
 		}
 	}
 	// shut down the loadBalancer and notify others about this event.

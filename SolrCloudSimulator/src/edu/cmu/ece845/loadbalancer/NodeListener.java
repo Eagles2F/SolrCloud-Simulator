@@ -5,6 +5,8 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
+import java.util.Map.Entry;
+import java.util.Set;
 
 import edu.cmu.ece845.utility.HeartbeatTimer;
 import edu.cmu.ece845.utility.Message;
@@ -20,7 +22,6 @@ import edu.cmu.ece845.utility.MessageType;
  */
 public class NodeListener implements Runnable{
 	private int nodeId;
-	private Socket nodeSoc;
 	private NodeHiringServer hiringServer;
     public volatile boolean running;
 
@@ -42,10 +43,11 @@ public class NodeListener implements Runnable{
         objOutput.flush();
     }
     
-    // initialization messages to the newbie node
-    private void initializeNode() throws IOException{
+    // initialization messages to a newbie node
+    private void initializeNode(Boolean is_new) throws IOException{
     	Message msg = new Message(MessageType.nodeInitialization);
     	msg.setAssignedID(nodeId);
+    	msg.setIs_new(is_new);
     	int mID = this.hiringServer.masterID;
     	msg.setLeaderID(mID);
     	msg.setLeaderPort(this.hiringServer.nodeComPortMap.get(mID));
@@ -57,7 +59,7 @@ public class NodeListener implements Runnable{
      * This function will update the state of node status on LB to 'active'.
      */
     private void handleHeartbeat(HeartbeatTimer timer, Message msg){
-    //	System.out.println("heartbeat:" + this.nodeId);
+  
     	this.hiringServer.nodeStatusMap.replace(this.nodeId, false, true);
     	timer.reset();
     }
@@ -65,20 +67,41 @@ public class NodeListener implements Runnable{
     private void handleInit(Message msg){
     	int port=Integer.valueOf(msg.getValue());
     	
-    	//check this port
+    	//check this port to see whether it has existed or not
+    	if(this.hiringServer.nodeComPortMap.containsValue(port)){
+    		System.out.println("old node:"+this.nodeId+" is listening on port: "+port +" for other nodes");
+    		//delete the old port-id entry
+    		int old_id = 0;
+    		final Set<Entry<Integer,Integer>> entries = this.hiringServer.nodeComPortMap.entrySet();
+    		
+    		for(Entry<Integer, Integer> entry: entries){
+    			if(entry.getValue() == port){
+    				old_id = entry.getKey();
+    			}
+    		}
+    		this.hiringServer.nodeComPortMap.remove(old_id);
+    		this.hiringServer.nodeComPortMap.put(this.nodeId, port);
+    		
+    		// send initialization message to the old Node
+			try {
+				initializeNode(false);
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+    		
+    	}
+    	else{
     	
-    	//change the maps
+    		System.out.println("the node:"+this.nodeId+" is listening on port:"+port +" for other nodes");
+    		this.hiringServer.nodeComPortMap.put(this.nodeId, port);
     	
-    	System.out.println("the node:"+this.nodeId+" is listening on port:"+port +" for other nodes");
-    	this.hiringServer.nodeComPortMap.put(this.nodeId, port);
-    	
-    	//send ack
-    	// send initialization message to the new Node
+    		// send initialization message to the new Node
     			try {
-    				initializeNode();
+    				initializeNode(true);
     			} catch (IOException e) {
     				e.printStackTrace();
     			}
+    	}
     }
 	@Override
 	public void run() {
@@ -109,7 +132,14 @@ public class NodeListener implements Runnable{
 				}
 			} catch (EOFException e1){
 				System.out.println("node "+this.nodeId + "died!");
-				this.hiringServer.nodeStatusMap.replace(this.nodeId, true, false);
+				//if the dead node is the leader, we should do a re-election
+				if(this.nodeId == this.hiringServer.masterID){
+					this.hiringServer.masterID++; // choose the min id in healthy nodes
+					//notify all the nodes there is a new leader
+					
+				}
+				this.hiringServer.nodeStatusMap.remove(this.nodeId);
+				this.hiringServer.nodeSocMap.remove(this.nodeId);
 				return ;
 			} catch (ClassNotFoundException | IOException e) {
 				e.printStackTrace();
