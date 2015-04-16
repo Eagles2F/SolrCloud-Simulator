@@ -101,7 +101,7 @@ public class Message implements Serializable {
 	@Override
 	public String toString() {
 		return "Message [messageType=" + messageType + ", source=" + source
-				+ ", dest=" + dest + ", data=" + data.toString() + ", seqNum=" + seqNum
+				+ ", dest=" + dest +  ", seqNum=" + seqNum
 				+ ", assignedID=" + assignedID + ", leaderID=" + leaderID
 				+ ", leaderPort=" + leaderPort + ", leaderIP=" + leaderIP + "]";
 	}

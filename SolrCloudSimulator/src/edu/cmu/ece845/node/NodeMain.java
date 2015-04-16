@@ -7,6 +7,7 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.concurrent.LinkedBlockingQueue;
 
+import edu.cmu.ece845.utility.DataItem;
 import edu.cmu.ece845.utility.Message;
 import edu.cmu.ece845.utility.MessageType;
 
@@ -75,18 +76,23 @@ public class NodeMain {
 		    outstream =  new ObjectOutputStream(socketToLB.getOutputStream());
 			instream = new ObjectInputStream(socketToLB.getInputStream());
 			
-			outstream.writeObject(new Message(MessageType.nodeInitialization));
+
+			Message m = new Message(MessageType.nodeInitialization);
+			
+			m.setData(new DataItem("nodeInitialization", myPort));
+			
+			outstream.writeObject(m);
 			
 			Message msg = (Message) instream.readObject();
 			
 			int myID = msg.getAssignedID();
 			
-			
+			System.out.println(msg.toString());
 				
 			// delete the following line and uncomment the below if-else
 			new Thread(new NodeAndLBConn(instream, outstream, myID, queue, false)).start();			
 
-			
+	/*		
 			if (myID != msg.getLeaderID()) {
 				new Thread(new NodeAndLBConn(instream, outstream, myID, queue, false)).start();			
 				new Thread(new NodeAndLeaderConn(msg.getLeaderID(), myID, msg.getLeaderIP(), msg.getLeaderPort())).start();
@@ -95,7 +101,7 @@ public class NodeMain {
 				new Thread(new NodeAndLBConn(instream, outstream, myID, queue, true)).start();	
 				startServer(myPort);
 			}
-		
+		*/
 			
 			
 		} catch (IOException | ClassNotFoundException e) {
