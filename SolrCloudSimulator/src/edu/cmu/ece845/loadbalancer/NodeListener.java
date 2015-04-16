@@ -63,7 +63,7 @@ public class NodeListener implements Runnable{
     }
 
     private void handleInit(Message msg){
-    	int port=Integer.valueOf(msg.getData().getValue());
+    	int port=Integer.valueOf(msg.getValue());
     	System.out.println("the node:"+this.nodeId+" is listening on port:"+port +" for other nodes");
     	this.hiringServer.nodeComPortMap.put(this.nodeId, port);
     }

@@ -7,7 +7,6 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.concurrent.LinkedBlockingQueue;
 
-import edu.cmu.ece845.utility.DataItem;
 import edu.cmu.ece845.utility.Message;
 import edu.cmu.ece845.utility.MessageType;
 
