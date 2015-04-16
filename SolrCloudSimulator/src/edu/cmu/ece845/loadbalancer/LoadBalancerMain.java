@@ -50,6 +50,8 @@ public class LoadBalancerMain {
             String[] inputLine = cmdLine.split(" ");
            
             switch(inputLine[0]){
+//            	case "ls":
+//            		handleLS();
             	case "quit":
             		handleQuit();
             		break;

@@ -1,5 +1,6 @@
 package edu.cmu.ece845.loadbalancer;
 
+import java.io.EOFException;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -56,6 +57,7 @@ public class NodeListener implements Runnable{
      * This function will update the state of node status on LB to 'active'.
      */
     private void handleHeartbeat(HeartbeatTimer timer, Message msg){
+    	System.out.println("heartbeat:" + this.nodeId);
     	this.hiringServer.nodeStatusMap.replace(this.nodeId, false, true);
     	timer.reset();
     }
@@ -89,10 +91,14 @@ public class NodeListener implements Runnable{
 				default:
 					break;
 				}
+			} catch (EOFException e1){
+				System.out.println("node "+this.nodeId + "died!");
+				this.hiringServer.nodeStatusMap.replace(this.nodeId, true, false);
+				return ;
 			} catch (ClassNotFoundException | IOException e) {
 				e.printStackTrace();
-			}
-			
+			} 
+	
 		}
 	}
 	

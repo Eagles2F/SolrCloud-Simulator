@@ -28,7 +28,10 @@ public class NodeHiringServer implements Runnable{
 		running = true;
 		nodeCount = 0;
 		masterID = 0; 
+		this.nodeStatusMap = new ConcurrentHashMap<Integer, Boolean>();
+		this.nodeSocMap = new ConcurrentHashMap<Integer, Socket>();
 	}
+	
 	@Override
 	public void run() {
 		System.out.println("NodeHiringServer starts to listen!");
