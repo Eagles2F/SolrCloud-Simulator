@@ -35,6 +35,7 @@ public class NodeServer implements Runnable {
 		try {
 		
 		// Replica joined
+		System.out.println("In NodeServer connection thread where replicas join");
 		System.out.println("connection established " + socket.getLocalPort() + " remote " + socket.getPort());
 		outstream = new ObjectOutputStream(socket.getOutputStream());
 		instream = new ObjectInputStream(socket.getInputStream());

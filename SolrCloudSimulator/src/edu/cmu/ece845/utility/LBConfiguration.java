@@ -18,8 +18,8 @@ public class LBConfiguration extends ConfigurationBase implements Serializable{
 	
 	public LBConfiguration(){
 	    prop = new Properties();
-        try {
-            input = new FileInputStream("/Users/evan/Documents/18845/SolrCloud-Simulator/SolrCloudSimulator/LBConfig.properties");
+        try {///Users/evan/Documents/18845/SolrCloud-Simulator/SolrCloudSimulator/
+            input = new FileInputStream("LBConfig.properties");
         } catch (FileNotFoundException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();

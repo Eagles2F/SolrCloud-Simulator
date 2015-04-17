@@ -40,6 +40,7 @@ public class NodeAndLeaderConn implements Runnable {
 		Socket socket = null;
 		Message msg;
 		
+		System.out.println("In NodeAndLeaderConn connection. I am the replica and I connected to master");
 		
 		 try {
 			 	// i am a replica. So connect to the leader.

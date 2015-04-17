@@ -36,6 +36,7 @@ public class NodeAndLBConn implements Runnable {
 		 try {
 		
 			// Setup the timer for heartbeat. Currently it is 1 sec
+			System.out.println("In NodeAndLBConn connection thread");
 			Timer timer = new Timer();
 			TimerTask task = new HeartBeat(nodeMain.outstream);
 			timer.schedule(task, new Date(), 1000);

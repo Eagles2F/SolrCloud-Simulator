@@ -66,7 +66,9 @@ public class LoadBalancerMain {
         }
 	}
 
-	
+	private void handleWirte(){
+		this.nodeHiringServer.nodeListenerMap.get(this.nodeHiringServer.masterID)console.send//
+	}
 	private void handleLS(){
 		final Set<Entry<Integer, Boolean>> entries = this.nodeHiringServer.nodeStatusMap.entrySet();
 		for(Entry<Integer, Boolean> entry : entries){
