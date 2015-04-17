@@ -38,7 +38,7 @@ public class NodeListener implements Runnable{
         running = true;
     }
     
-    private void sendToNode(Message msg) throws IOException{
+    public void sendToNode(Message msg) throws IOException{
     	objOutput.writeObject(msg);
         objOutput.flush();
     }

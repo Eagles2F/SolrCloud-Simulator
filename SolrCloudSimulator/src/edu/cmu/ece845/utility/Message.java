@@ -32,8 +32,9 @@ public class Message implements Serializable {
 	// dataitem
 	private String key;
 	private String value;
-	private String dataString;
 	
+	private String dataString;//using in the node sync process
+		
 	public String getDataString() {
 		return dataString;
 	}

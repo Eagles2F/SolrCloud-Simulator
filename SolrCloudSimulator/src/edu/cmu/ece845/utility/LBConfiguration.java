@@ -37,6 +37,9 @@ public class LBConfiguration extends ConfigurationBase implements Serializable{
 		return Integer.valueOf(prop.getProperty("nodeHiringPort"));
 	}
 	
+	public int getClientListeningPort(){
+		return Integer.valueOf(prop.getProperty("clientServingPort"));
+	}
 	
 	public  Properties getProperties(){
 	    return prop;
