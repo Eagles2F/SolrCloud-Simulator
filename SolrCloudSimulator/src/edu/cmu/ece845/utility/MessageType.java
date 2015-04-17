@@ -7,5 +7,8 @@ public enum MessageType {
         leaderReelection, // the message sent from loadBalancer to the nodes to notify the change of leader
         syncwithleader, // the message to send for syncing with the leader
         writeData, // writing the new data to the leader
-        queryData // query the data from the leader
+        queryData, // query the data from the leader
+        writeAck, //write Ack for the write request to the client
+        queryAck // write Ack for the query request to the client
+        
 }
