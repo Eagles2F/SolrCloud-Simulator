@@ -97,6 +97,7 @@ public class NodeServer implements Runnable {
 					currline = currline + "\n";
 					syncm.setDataString(currline);
 					outstream.writeObject(syncm);					
+					//Thread.sleep(2000); // for testing
 					// TODO: Wait for ACK ?
 				}
 			}
