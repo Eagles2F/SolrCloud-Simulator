@@ -58,10 +58,12 @@ public class NodeMain {
 	public ObjectInputStream instream;
 	public File logFile;
 	public ConcurrentHashMap<Integer, LinkedBlockingQueue<Message>> queueHashMap;
+	public int timestamp;
 	
 	public NodeMain () {
 		queueList = new ArrayList<LinkedBlockingQueue<Message>>();
 		queueHashMap = new ConcurrentHashMap<Integer, LinkedBlockingQueue<Message>>();
+		timestamp = 0;
 	}
 	
 	public void runNodeMain(String args[]) {
@@ -103,6 +105,7 @@ public class NodeMain {
 			
 			// check if I am old guy or existing guy. If I am oldguy, I am I have the file and i need to sync
 			if(msg.getIs_new()) {
+				System.out.println("Need to create a log file");
 				
 				 if (logFile.createNewFile())
 					{
@@ -124,13 +127,14 @@ public class NodeMain {
 				startServer(myPort);
 			}
 			
+			
 		} catch (IOException | ClassNotFoundException e) {
 			e.printStackTrace();
 		} 
 		
 		
 	}
-	
+
 	/* start the server if you are the leader*/
 	private void startServer(String myPort) {
 		
@@ -163,10 +167,17 @@ public class NodeMain {
 		this.queueList.add(q);
 	}
 	
+	// Method to implement steps required when a replica is turned into a leader on an actual leader failure
+	public void replicaToLeaderStuff() {
+		System.out.println("hello");
+	}
+	
 	public static void main(String[] args) {
 		
 		NodeMain nm = new NodeMain();
 		nm.runNodeMain(args);
 		
 	}
+	
+	
 }

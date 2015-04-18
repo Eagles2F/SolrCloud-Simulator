@@ -50,9 +50,7 @@ public class NodeAndLeaderConn implements Runnable {
 				ObjectOutputStream outstream =  new ObjectOutputStream(socket.getOutputStream());
 				ObjectInputStream instream = new ObjectInputStream(socket.getInputStream());	
 				 
-				// initialize the files stuff
-				FileWriter fw = new FileWriter(nodeMain.logFile.getAbsoluteFile());
-				bw = new BufferedWriter(fw);	
+	
 				String content, lastWriteId;
 				
 				// sync the dead node
@@ -89,8 +87,15 @@ public class NodeAndLeaderConn implements Runnable {
 				// lastWriteId == -1 if new node. sync and join are same for the replica
 				Message m = new Message(MessageType.syncwithleader);
 				m.setValue(lastWriteId);
+				m.setAssignedID(nodeMain.myID);
+				
 				outstream.writeObject(m);
 					
+				// initialize the files stuff
+				FileWriter fw = new FileWriter(nodeMain.logFile.getAbsoluteFile(), true);
+				bw = new BufferedWriter(fw);
+				
+				
 				// wait for messages - multithread?
 				while(true) {
 					
@@ -100,12 +105,16 @@ public class NodeAndLeaderConn implements Runnable {
 					// write msg to file
 					if (msg.getMessageType() == MessageType.syncwithleader) {
 					// pull the message content from the incoming message. It will be type sync
+						System.out.println("Got sync data from the master");
 						content = msg.getDataString();
 						bw.write(content);
+						bw.flush();
 					}
 					else if (msg.getMessageType() == MessageType.writeData) {
+						System.out.println("got new data from master. Let's save it to my log file ");
 						content = msg.getDataString();
 						bw.write(content);
+						bw.flush();
 					}
 					else {
 						// TODO: handle any other message type - shouldnt come here
@@ -114,6 +123,7 @@ public class NodeAndLeaderConn implements Runnable {
 	
 		 	} catch ( ClassNotFoundException | IOException e) {
 				e.printStackTrace();
+				System.out.println("master died");
 			} finally {
 				try {
 					socket.close();

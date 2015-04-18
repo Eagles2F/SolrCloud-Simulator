@@ -47,7 +47,7 @@ public class NodeAndLBConn implements Runnable {
 			// if I am the leader, then open file for writing
 			if (isLeader) {
 				
-				fw = new FileWriter(nodeMain.logFile.getAbsoluteFile());
+				fw = new FileWriter(nodeMain.logFile.getAbsoluteFile(), true);
 				bw = new BufferedWriter(fw);	
 			}
 			
@@ -59,9 +59,13 @@ public class NodeAndLBConn implements Runnable {
 					// if msg is write - then write to local file and forward to replicas 
 					System.out.println("Normal write message");
 			
-					content =  msg.getSeqNum() + " " + dateFormat.format(new Date()) + 
-							" key:" + msg.getKey() + " value:" + msg.getValue();
+					content =  nodeMain.timestamp + " " + dateFormat.format(new Date()) + 
+							" key:" + msg.getKey() + " value:" + msg.getValue() + "\n";
 					bw.write(content);
+					bw.flush();
+					
+					// increment the timestamp for the next log entry. This number is unique to each master
+					nodeMain.timestamp++;
 					
 					// the message is stored in data and this string data is to be stored in replicas
 					msg.setDataString(content);
@@ -69,6 +73,7 @@ public class NodeAndLBConn implements Runnable {
 					// put the message in all the queues. Each queue belongs to one replica. The server will push send the data
 					for (LinkedBlockingQueue<Message> q : nodeMain.queueList)
 						q.put(msg);
+						//q.put((Message) msg.clone());
 					
 					// TODO: Write in the hashmap for local caching
 					
@@ -87,7 +92,10 @@ public class NodeAndLBConn implements Runnable {
 						System.out.println(msg.toString());
 						
 						// TODO: Take action of what happens when leader re-election happens
-						// connect to new leader. If I am the new leader, then how to do stuff?
+						// connect to new leader. If I am the new leader, then how to do stuff - read the 
+						// last log entry and send set that entry in my file
+						nodeMain.replicaToLeaderStuff();
+						
 					}
 					else {
 						System.out.println("shouldn't reach here");

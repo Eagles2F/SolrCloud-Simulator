@@ -82,7 +82,7 @@ public class NodeServer implements Runnable {
 		}
 		
 		} catch (IOException | InterruptedException | ClassNotFoundException e) {
-			e.printStackTrace();
+			//e.printStackTrace();
 			// remove if the node dies - 
 			System.out.println("Thread died. This thread was of the leader and replica id: " + replicaid + " was connected to it");
 			nodeMain.queueList.remove(localQueue);
