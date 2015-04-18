@@ -73,8 +73,12 @@ public class NodeAndLeaderConn implements Runnable {
 					String [] tok = lastline.split(" ");
 					lastWriteId = tok[0];
 					
+					if (lastWriteId.equals(""))
+						lastWriteId = "-1";
+				
+					
 					// get the last id to sync after
-					System.out.println("The last written id is " + lastWriteId);
+					System.out.println("The sync id is after " + lastWriteId);
 					br.close();
 					
 					
@@ -122,15 +126,21 @@ public class NodeAndLeaderConn implements Runnable {
 				}
 	
 		 	} catch ( ClassNotFoundException | IOException e) {
-				e.printStackTrace();
-				System.out.println("master died");
+				
+				System.out.println(" master died 1" );
+				//e.printStackTrace();
+				System.out.println(" master died 2" );
 			} finally {
 				try {
+					System.out.println(" master died 3" );
 					socket.close();
 					bw.close();
+					System.out.println(" master died 4" );
 				} catch (IOException e) {
 					// TODO Auto-generated catch block
-					e.printStackTrace();
+					System.out.println(" master died 5" );
+					//e.printStackTrace();
+					System.out.println(" master died 6" );
 				}
 			}
 			 

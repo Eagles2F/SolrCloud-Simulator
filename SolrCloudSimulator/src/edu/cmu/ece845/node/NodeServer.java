@@ -62,7 +62,7 @@ public class NodeServer implements Runnable {
 				
 			} // restarted replica. So sync from some id
 			else {
-				System.out.println("sync required from id: " + Integer.parseInt(id));
+				System.out.println("sync required after id: " + Integer.parseInt(id));
 				// TODO: Read the file and find the id to send the remaining ids to the replica
 			}
 		}
@@ -84,6 +84,7 @@ public class NodeServer implements Runnable {
 		} catch (IOException | InterruptedException | ClassNotFoundException e) {
 			//e.printStackTrace();
 			// remove if the node dies - 
+			System.out.println(" nodeserver died 1" );
 			System.out.println("Thread died. This thread was of the leader and replica id: " + replicaid + " was connected to it");
 			nodeMain.queueList.remove(localQueue);
 			nodeMain.queueHashMap.remove(replicaid);

@@ -38,8 +38,8 @@ public class NodeAndLBConn implements Runnable {
 			// Setup the timer for heartbeat. Currently it is 1 sec
 			System.out.println("In NodeAndLBConn connection thread");
 			Timer timer = new Timer();
-			TimerTask task = new HeartBeat(nodeMain.outstream);
-			timer.schedule(task, new Date(), 1000);
+			TimerTask task = new HeartBeat(nodeMain.outstream, nodeMain.myID);
+			timer.schedule(task, new Date(), 2000);
 			
 			String content;
 			DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
@@ -52,7 +52,8 @@ public class NodeAndLBConn implements Runnable {
 			}
 			
 			// get the message from loadbalancer to write
-			while(true) {
+			while(!Thread.currentThread().isInterrupted()) {
+				
 				msg = (Message) nodeMain.instream.readObject();
 				
 				if (isLeader && msg.getMessageType() == MessageType.writeData) {
@@ -94,7 +95,9 @@ public class NodeAndLBConn implements Runnable {
 						// TODO: Take action of what happens when leader re-election happens
 						// connect to new leader. If I am the new leader, then how to do stuff - read the 
 						// last log entry and send set that entry in my file
-						nodeMain.replicaToLeaderStuff();
+						
+						
+						nodeMain.restartNodeThreadtoLB(msg);
 						
 					}
 					else {
@@ -106,15 +109,18 @@ public class NodeAndLBConn implements Runnable {
 							
 			}
 					        
-		} catch (IOException | ClassNotFoundException | InterruptedException e) {
-				e.printStackTrace();
+		} catch (IOException | ClassNotFoundException | InterruptedException  e) {
+				//e.printStackTrace();
+				System.out.println(" nodeandlb died 3" );
 		}
 	    
 		 try {
-			bw.close();
+			 if (isLeader) {
+				 bw.close();
+			 }
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			System.out.println(" nodeandlb died 4" );
+			// e.printStackTrace();
 		}
 	}
 }
@@ -126,19 +132,25 @@ public class NodeAndLBConn implements Runnable {
 class HeartBeat extends TimerTask {
 
 	ObjectOutputStream outstream;
+	int myid;
 	
-	public HeartBeat(ObjectOutputStream outstream2) {
+	public HeartBeat(ObjectOutputStream outstream2, int id ) {
 		this.outstream = outstream2;
+		this.myid = id;
 	}
 
 	@Override
 	public void run() {
 		
 		try {
-			outstream.writeObject(new Message(MessageType.heartbeat));
+			Message m = new Message(MessageType.heartbeat);
+			m.setAssignedID(myid);
+			outstream.writeObject(m);
 		
 		} catch (IOException e) {
-			e.printStackTrace();
+			//e.printStackTrace();
+			System.out.println(" nodeandlb died 5" );
+			
 		}
 	}
 	
