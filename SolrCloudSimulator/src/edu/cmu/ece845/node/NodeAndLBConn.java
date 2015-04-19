@@ -95,6 +95,7 @@ public class NodeAndLBConn implements Runnable {
 					{
 							Message m = new Message(MessageType.queryAck);
 							m.setSeqNum(msg.getSeqNum());
+							m.setKey(msg.getKey());
 							nodeMain.outstream.writeObject(m);
 					}
 					
