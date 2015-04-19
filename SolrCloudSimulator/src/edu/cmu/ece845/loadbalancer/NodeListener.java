@@ -60,6 +60,7 @@ public class NodeListener implements Runnable{
      */
     private void handleHeartbeat(HeartbeatTimer timer, Message msg){
   
+    	//System.out.println("Got heartbeat from " + this.nodeId +  " " + msg.getAssignedID());
     	this.hiringServer.nodeStatusMap.replace(this.nodeId, false, true);
     	timer.reset();
     }

@@ -1,6 +1,9 @@
 package edu.cmu.ece845.node;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -58,10 +61,16 @@ public class NodeMain {
 	public ObjectInputStream instream;
 	public File logFile;
 	public ConcurrentHashMap<Integer, LinkedBlockingQueue<Message>> queueHashMap;
+	public int timestamp;
+	public String myPort;
+	public Thread tlb;
+	public Hashtable<String, String> dataCache;
 	
 	public NodeMain () {
 		queueList = new ArrayList<LinkedBlockingQueue<Message>>();
 		queueHashMap = new ConcurrentHashMap<Integer, LinkedBlockingQueue<Message>>();
+		timestamp = 0;
+		dataCache = new Hashtable<String, String>();
 	}
 	
 	public void runNodeMain(String args[]) {
@@ -70,7 +79,7 @@ public class NodeMain {
 	
 		try {
 	
-			String myPort = args[0];
+			myPort = args[0];
 			
 			// make a new file
 			logFile = new File("logfile_" + myPort + ".txt");
@@ -103,6 +112,7 @@ public class NodeMain {
 			
 			// check if I am old guy or existing guy. If I am oldguy, I am I have the file and i need to sync
 			if(msg.getIs_new()) {
+				System.out.println("Need to create a log file");
 				
 				 if (logFile.createNewFile())
 					{
@@ -112,17 +122,9 @@ public class NodeMain {
 		
 			// delete the following line and uncomment the below if-else
 			//new Thread(new NodeAndLBConn(this, false)).start();			
-	
-			// if I am not the leader, then start the LB connection thread and leader connection thread
-			if (myID != msg.getLeaderID()) {
-				new Thread(new NodeAndLBConn(this, false)).start();			
-				new Thread(new NodeAndLeaderConn(this, msg.getLeaderID(), msg.getLeaderIP(), msg.getLeaderPort(), msg.getIs_new())).start();
-			}
-			// if I am the leader, then start LB connection thread and start the server to listen for incoming replica connections
-			else {
-				new Thread(new NodeAndLBConn(this, true)).start();	
-				startServer(myPort);
-			}
+			
+			startThreads(msg);
+			
 			
 		} catch (IOException | ClassNotFoundException e) {
 			e.printStackTrace();
@@ -130,7 +132,7 @@ public class NodeMain {
 		
 		
 	}
-	
+
 	/* start the server if you are the leader*/
 	private void startServer(String myPort) {
 		
@@ -163,10 +165,92 @@ public class NodeMain {
 		this.queueList.add(q);
 	}
 	
+	// Method to add threads for the node
+	private void startThreads(Message msg) {
+		// if I am not the leader, then start the LB connection thread and leader connection thread
+		if (myID != msg.getLeaderID()) {
+			tlb = new Thread(new NodeAndLBConn(this, false));
+			tlb.start();
+			new Thread(new NodeAndLeaderConn(this, msg.getLeaderID(), msg.getLeaderIP(), msg.getLeaderPort(), msg.getIs_new())).start();
+		}
+		// if I am the leader, then start LB connection thread and start the server to listen for incoming replica connections
+		else {
+			tlb = new Thread(new NodeAndLBConn(this, true));
+			tlb.start();
+			startServer(myPort);
+		}
+		
+	}
+	
+	// Method to implement steps required when a replica is turned into a leader on an actual leader failure
+	public void restartNodeThreadtoLB(Message msg) {
+		System.out.println("killing the exisiting thread - lb connection");
+		tlb.interrupt();
+		
+		if(msg.getLeaderID() == myID)
+		{
+			// last read timestamp and assign it to the master
+			try {
+			FileReader fr;
+			
+				fr = new FileReader(this.logFile.getAbsoluteFile());
+			
+			BufferedReader br = new BufferedReader(fr);
+			
+			String lastline="";
+			String currline="";
+			
+			while ((currline = br.readLine()) != null) {
+				lastline = currline;
+			}
+			
+			System.out.println(lastline);
+			String [] tok = lastline.split(" ");
+			
+			if (tok[0].equals(""))
+				tok[0] = "-1";
+			
+			this.timestamp = Integer.parseInt(tok[0]);
+			
+			this.timestamp++;
+			
+			// get the last id to sync after
+			System.out.println("The new master id is updated to " + this.timestamp);
+			br.close();
+			
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		} else { 
+			// it is existing node. Hence set this field to false
+			msg.setIs_new(false);
+		}
+		
+		startThreads(msg);
+	}
+
+	public void writeToDataCache(String key, String value) {
+		this.dataCache.put(key, value);
+	}
+	
+	public void clearDataCache() {
+		this.dataCache.clear();
+	}
+	
+	public String getValueFromDataCache(String key) {
+		if (this.dataCache.containsKey(key))
+			return this.dataCache.get(key);
+		else
+			return null;
+	}
+	
 	public static void main(String[] args) {
 		
 		NodeMain nm = new NodeMain();
 		nm.runNodeMain(args);
 		
 	}
+
+
+	
 }

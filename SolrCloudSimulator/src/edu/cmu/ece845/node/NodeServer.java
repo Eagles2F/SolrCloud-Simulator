@@ -1,5 +1,7 @@
 package edu.cmu.ece845.node;
 
+import java.io.BufferedReader;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -8,6 +10,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 
 import edu.cmu.ece845.utility.Message;
 import edu.cmu.ece845.utility.MessageType;
+import edu.cmu.ece845.utility.TuneableVars;
 
 /**
  * @author darshs
@@ -35,6 +38,7 @@ public class NodeServer implements Runnable {
 		try {
 		
 		// Replica joined
+		System.out.println("In NodeServer connection thread where replicas join");
 		System.out.println("connection established " + socket.getLocalPort() + " remote " + socket.getPort());
 		outstream = new ObjectOutputStream(socket.getOutputStream());
 		instream = new ObjectInputStream(socket.getInputStream());
@@ -47,27 +51,65 @@ public class NodeServer implements Runnable {
 		if (msg.getMessageType() == MessageType.syncwithleader) 
 		{
 			nodeMain.addReplicaQueueinQueueList(localQueue);
-			String id = msg.getValue();
+			String syncid = msg.getValue();
 			replicaid = msg.getAssignedID();
 			
 			// Save the replica ids in some table (in the NodeMain class)
 			nodeMain.queueHashMap.put(replicaid, localQueue);
 			
+			FileReader fr = new FileReader(nodeMain.logFile.getAbsoluteFile());
+			BufferedReader br = new BufferedReader(fr);
+		
+			Message syncm;
+			// TODO: Add a hook for the sync system
+			
 			// new replica. So sync from beginning
-			if (Integer.parseInt(id) == -1)
+			if (Integer.parseInt(syncid) == -1)
 			{
 				System.out.println("sync required from starting");
-				// TODO: Read the file and sync from beginning
+				// Read the file and sync from beginning
+				String currline="";
+				
+				while ((currline = br.readLine()) != null) {
+					syncm = new Message(MessageType.syncwithleader);
+					currline = currline + "\n";
+					syncm.setDataString(currline);
+					outstream.writeObject(syncm);
+					Thread.sleep(TuneableVars.HEARTBEAT_TIMER);
+					// TODO: Wait for ACK ?
+				}
 				
 			} // restarted replica. So sync from some id
 			else {
-				System.out.println("sync required from id: " + Integer.parseInt(id));
-				// TODO: Read the file and find the id to send the remaining ids to the replica
+				System.out.println("sync required after id: " + Integer.parseInt(syncid));
+				// Read the file and find the id to send the remaining ids to the replica
+	
+				String currline="";
+				String [] tok;
+				
+				while ((currline = br.readLine()) != null) {
+					tok = currline.split(" ");
+					if (tok[0].equals(syncid))  // find the last id
+						break;
+				}
+						
+				// Found the last id. Now send new data
+				while ((currline = br.readLine()) != null) {
+					syncm = new Message(MessageType.syncwithleader);
+					currline = currline + "\n";
+					syncm.setDataString(currline);
+					outstream.writeObject(syncm);					
+					Thread.sleep(TuneableVars.HEARTBEAT_TIMER); 
+					// TODO: Wait for ACK ?
+				}
 			}
+			
+			br.close();
 		}
 		
 		else {
 			// do something else - shouldn't reach here
+			System.out.println("shouldn't reach here");
 		}
 		
 		
@@ -81,8 +123,9 @@ public class NodeServer implements Runnable {
 		}
 		
 		} catch (IOException | InterruptedException | ClassNotFoundException e) {
-			e.printStackTrace();
+			//e.printStackTrace();
 			// remove if the node dies - 
+			System.out.println(" nodeserver died 1" );
 			System.out.println("Thread died. This thread was of the leader and replica id: " + replicaid + " was connected to it");
 			nodeMain.queueList.remove(localQueue);
 			nodeMain.queueHashMap.remove(replicaid);

@@ -7,6 +7,8 @@ import java.util.Map.Entry;
 import java.util.Set;
 
 import edu.cmu.ece845.utility.LBConfiguration;
+import edu.cmu.ece845.utility.Message;
+import edu.cmu.ece845.utility.MessageType;
 
 /*
  * @Author: Yifan Li
@@ -66,12 +68,35 @@ public class LoadBalancerMain {
             	case "help":
             		handleHelp();
             		break;
+            	case "writemaster":
+				
+				try {
+					String key = console.readLine();
+					String value = console.readLine();
+            		handleWrite(key, value);
+            		
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+            		
+            		break;
                 default:
-                    System.out.println(inputLine[0]+"is not a valid command");
+                    System.out.println(inputLine[0]+" is not a valid command");
             }
         }
 	}
 
+	private void handleWrite(String key, String value){
+		Message msg = new Message(MessageType.writeData);
+		msg.setKey(key);
+		msg.setValue(value);
+		try {
+			this.nodeHiringServer.nodeListenerMap.get(this.nodeHiringServer.masterID).sendToNode(msg);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
 	
 	private void handleLS(){
 		final Set<Entry<Integer, Boolean>> entries = this.nodeHiringServer.nodeStatusMap.entrySet();

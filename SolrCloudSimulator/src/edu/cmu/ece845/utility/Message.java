@@ -2,7 +2,7 @@ package edu.cmu.ece845.utility;
 
 import java.io.Serializable;
 
-public class Message implements Serializable {
+public class Message implements Serializable, Cloneable {
 
 	/**
 	 * 
@@ -135,5 +135,8 @@ public class Message implements Serializable {
 				+ ", leaderPort=" + leaderPort + ", leaderIP=" + leaderIP + "]";
 	}
 
+	public Object clone() throws CloneNotSupportedException {
+        return super.clone();
+    }
 	
 }
