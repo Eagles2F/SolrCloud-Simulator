@@ -10,6 +10,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 
 import edu.cmu.ece845.utility.Message;
 import edu.cmu.ece845.utility.MessageType;
+import edu.cmu.ece845.utility.TuneableVars;
 
 /**
  * @author darshs
@@ -74,6 +75,7 @@ public class NodeServer implements Runnable {
 					currline = currline + "\n";
 					syncm.setDataString(currline);
 					outstream.writeObject(syncm);
+					Thread.sleep(TuneableVars.HEARTBEAT_TIMER);
 					// TODO: Wait for ACK ?
 				}
 				
@@ -97,7 +99,7 @@ public class NodeServer implements Runnable {
 					currline = currline + "\n";
 					syncm.setDataString(currline);
 					outstream.writeObject(syncm);					
-					//Thread.sleep(2000); // for testing
+					Thread.sleep(TuneableVars.HEARTBEAT_TIMER); 
 					// TODO: Wait for ACK ?
 				}
 			}

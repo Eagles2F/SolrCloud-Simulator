@@ -13,6 +13,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 
 import edu.cmu.ece845.utility.Message;
 import edu.cmu.ece845.utility.MessageType;
+import edu.cmu.ece845.utility.TuneableVars;
 
 /**
  * @author darshs
@@ -39,7 +40,7 @@ public class NodeAndLBConn implements Runnable {
 			System.out.println("In NodeAndLBConn connection thread");
 			Timer timer = new Timer();
 			TimerTask task = new HeartBeat(nodeMain.outstream, nodeMain.myID);
-			timer.schedule(task, new Date(), 2000);
+			timer.schedule(task, new Date(), TuneableVars.HEARTBEAT_TIMER);
 			
 			String content;
 			DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
@@ -74,15 +75,25 @@ public class NodeAndLBConn implements Runnable {
 					// put the message in all the queues. Each queue belongs to one replica. The server will push send the data
 					for (LinkedBlockingQueue<Message> q : nodeMain.queueList)
 						q.put(msg);
-						//q.put((Message) msg.clone());
 					
-					// TODO: Write in the hashmap for local caching
+					// Write in the hashmap for local caching
+					nodeMain.writeToDataCache(msg.getKey(), msg.getValue());
+					
+					// reply ACK for writing
+					nodeMain.outstream.writeObject(new Message(MessageType.writeAck));
 					
 					
 				} else if (isLeader && msg.getMessageType() == MessageType.queryData) {
 					
-					// query the data from local hashamp 
-					// message is query, look in the local hashmap and file
+					// message is query, look in the local hashmap
+					String val = nodeMain.getValueFromDataCache(msg.getKey());
+					
+					// send reply if query was present in the cache
+					if (val != null)
+					{
+							Message m = new Message(MessageType.queryAck);
+							nodeMain.outstream.writeObject(m);
+					}
 					
 				} else {
 					// the msg can be that I am the new leader or the leader has changed. 
@@ -92,20 +103,17 @@ public class NodeAndLBConn implements Runnable {
 						System.out.println("My id is " + nodeMain.myID);
 						System.out.println(msg.toString());
 						
-						// TODO: Take action of what happens when leader re-election happens
-						// connect to new leader. If I am the new leader, then how to do stuff - read the 
-						// last log entry and send set that entry in my file
-						
-						
+						// method to take care of restarting the threads
 						nodeMain.restartNodeThreadtoLB(msg);
 						
 					}
 					else {
-						System.out.println("shouldn't reach here");
+						System.out.println("shouldn't reach here in nodeandlbconnection");
 					}
 				}
 				
 				// Do something with the msg object. 
+				System.out.println("shouldn't reach here in nodeandlbconnection 2");
 							
 			}
 					        

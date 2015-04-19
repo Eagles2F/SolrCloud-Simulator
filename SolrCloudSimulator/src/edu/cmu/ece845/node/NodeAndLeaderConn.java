@@ -113,15 +113,25 @@ public class NodeAndLeaderConn implements Runnable {
 						content = msg.getDataString();
 						bw.write(content);
 						bw.flush();
+						
+						// write to cache
+						nodeMain.writeToDataCache(msg.getKey(), msg.getValue());
+						// do we ack syn data?
 					}
 					else if (msg.getMessageType() == MessageType.writeData) {
 						System.out.println("got new data from master. Let's save it to my log file ");
 						content = msg.getDataString();
 						bw.write(content);
 						bw.flush();
+						
+						// write to cache
+						nodeMain.writeToDataCache(msg.getKey(), msg.getValue());
+
+						//replica doesn't send back ack to leader for writedata
 					}
 					else {
 						// TODO: handle any other message type - shouldnt come here
+						System.out.println("shouldn't come here in nodeandleaderconnection");
 					}
 				}
 	

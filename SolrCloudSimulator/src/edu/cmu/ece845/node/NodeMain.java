@@ -64,11 +64,13 @@ public class NodeMain {
 	public int timestamp;
 	public String myPort;
 	public Thread tlb;
+	public Hashtable<String, String> dataCache;
 	
 	public NodeMain () {
 		queueList = new ArrayList<LinkedBlockingQueue<Message>>();
 		queueHashMap = new ConcurrentHashMap<Integer, LinkedBlockingQueue<Message>>();
 		timestamp = 0;
+		dataCache = new Hashtable<String, String>();
 	}
 	
 	public void runNodeMain(String args[]) {
@@ -227,6 +229,20 @@ public class NodeMain {
 		startThreads(msg);
 	}
 
+	public void writeToDataCache(String key, String value) {
+		this.dataCache.put(key, value);
+	}
+	
+	public void clearDataCache() {
+		this.dataCache.clear();
+	}
+	
+	public String getValueFromDataCache(String key) {
+		if (this.dataCache.containsKey(key))
+			return this.dataCache.get(key);
+		else
+			return null;
+	}
 	
 	public static void main(String[] args) {
 		
