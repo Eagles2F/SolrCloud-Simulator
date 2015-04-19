@@ -116,9 +116,6 @@ public class NodeAndLBConn implements Runnable {
 						System.out.println("shouldn't reach here in nodeandlbconnection");
 					}
 				}
-				
-				// Do something with the msg object. 
-				System.out.println("shouldn't reach here in nodeandlbconnection 2");
 							
 			}
 					        

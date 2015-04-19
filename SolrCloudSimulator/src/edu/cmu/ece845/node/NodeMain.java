@@ -187,25 +187,31 @@ public class NodeMain {
 		System.out.println("killing the exisiting thread - lb connection");
 		tlb.interrupt();
 		
+		// I am the leader
 		if(msg.getLeaderID() == myID)
 		{
 			// last read timestamp and assign it to the master
 			try {
-			FileReader fr;
-			
-				fr = new FileReader(this.logFile.getAbsoluteFile());
-			
+			FileReader fr = new FileReader(this.logFile.getAbsoluteFile());
 			BufferedReader br = new BufferedReader(fr);
 			
 			String lastline="";
 			String currline="";
 			
+			dataCache = new Hashtable<String, String>();
+			String [] tok, key, value;
+			
+			// building the local caching from the file as this is now a leader
 			while ((currline = br.readLine()) != null) {
 				lastline = currline;
+				tok = currline.split(" ");
+				key = tok[3].split(":");
+				value = tok[4].split(":");
+				writeToDataCache(key[1], value[1]);
 			}
 			
 			System.out.println(lastline);
-			String [] tok = lastline.split(" ");
+			tok = lastline.split(" ");
 			
 			if (tok[0].equals(""))
 				tok[0] = "-1";
@@ -222,7 +228,7 @@ public class NodeMain {
 				e.printStackTrace();
 			}
 		} else { 
-			// it is existing node. Hence set this field to false
+			// it is existing node and a replica. Hence set this field to false - need this for sync
 			msg.setIs_new(false);
 		}
 		
