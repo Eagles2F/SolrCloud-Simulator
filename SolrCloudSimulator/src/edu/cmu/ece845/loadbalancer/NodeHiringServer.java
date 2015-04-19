@@ -21,13 +21,15 @@ public class NodeHiringServer implements Runnable{
 	public ConcurrentHashMap<Integer, Integer> nodeComPortMap; // the port which the node is using to listening to other nodes
 	public ConcurrentHashMap<Integer, NodeListener> nodeListenerMap;
 	
+	public LoadBalancerMain lb;
 	public int masterID;
 	public int nodeCount;
 	public int portNum;
 	private volatile boolean running;
 	
-	public NodeHiringServer(int port){
+	public NodeHiringServer(int port, LoadBalancerMain lb){
 		this.portNum = port;
+		this.lb = lb;
 		running = true;
 		nodeCount = 0;
 		masterID = 0; 

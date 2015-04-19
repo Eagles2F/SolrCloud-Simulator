@@ -23,12 +23,14 @@ import edu.cmu.ece845.utility.MessageType;
 public class LoadBalancerMain {
 
 	private NodeHiringServer nodeHiringServer;
+	public  ClientServer clientServer;
 	private BufferedReader console;
 	private boolean running;
 	
 	public LoadBalancerMain(LBConfiguration lb){
 		//initialization
-		nodeHiringServer = new NodeHiringServer(lb.getNodeHiring_port());
+		nodeHiringServer = new NodeHiringServer(lb.getNodeHiring_port(), this);
+		clientServer = new ClientServer(lb.getClientListeningPort(), this.nodeHiringServer);
 		console = new BufferedReader(new InputStreamReader(System.in));
 		running = true;
 	}
@@ -38,6 +40,10 @@ public class LoadBalancerMain {
         t1.start();
 	}
 	
+	private void startClientServer(){
+		Thread t2 = new Thread(clientServer);
+		t2.start();
+	}
 	public void startConsole(){
         System.out.println("This is SolrCloud simulator: LoadBalancer, type help for more information");
         
@@ -114,7 +120,7 @@ public class LoadBalancerMain {
 		
 		LoadBalancerMain lb = new LoadBalancerMain(lbConf);
 		// start Query Server and Index Server
-		
+		lb.startClientServer();
 		// start NodeHiring Server
 		lb.startNodeHiringServer();
 		// start console

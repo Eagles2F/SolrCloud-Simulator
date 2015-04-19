@@ -35,8 +35,9 @@ public class ClientServer implements Runnable{
 		System.out.println("ClientServer starts to listen on port:" + this.portNum);
 		try {
 			ServerSocket server = new ServerSocket(this.portNum);
-
+			
 			this.clientSoc = server.accept();
+			System.out.println("Client joined!");
 			listenToClient();
 			
 		} catch (IOException e) {
@@ -52,7 +53,7 @@ public class ClientServer implements Runnable{
 			
 			while(running){
 				Message msg = (Message)this.objInput.readObject();
-				
+				System.out.println(msg.getMessageType()+ "  "+ msg.getAssignedID()+"  "+msg.getKey());
 				switch(msg.getMessageType()){
 					case writeData:
 						handleWrite(msg);
@@ -96,5 +97,15 @@ public class ClientServer implements Runnable{
 			e.printStackTrace();
 		}
 		
+	}
+	
+	public void sendToClient(Message msg){
+		try {
+			this.objOutput.writeObject(msg);
+			this.objOutput.flush();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}		
 	}
 }
