@@ -80,7 +80,9 @@ public class NodeAndLBConn implements Runnable {
 					nodeMain.writeToDataCache(msg.getKey(), msg.getValue());
 					
 					// reply ACK for writing
-					nodeMain.outstream.writeObject(new Message(MessageType.writeAck));
+					Message m = new Message(MessageType.writeAck);
+					m.setSeqNum(msg.getSeqNum());
+					nodeMain.outstream.writeObject(m);
 					
 					
 				} else if (isLeader && msg.getMessageType() == MessageType.queryData) {
@@ -92,8 +94,11 @@ public class NodeAndLBConn implements Runnable {
 					if (val != null)
 					{
 							Message m = new Message(MessageType.queryAck);
+							m.setSeqNum(msg.getSeqNum());
 							nodeMain.outstream.writeObject(m);
 					}
+					
+					// don't send anything back if query not found
 					
 				} else {
 					// the msg can be that I am the new leader or the leader has changed. 
