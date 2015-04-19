@@ -63,7 +63,10 @@ public class NodeListener implements Runnable{
     	this.hiringServer.nodeStatusMap.replace(this.nodeId, false, true);
     	timer.reset();
     }
-
+    
+    private void handleQueryAck(Message msg){
+    	this.hiringServer.lb.clientServer.sendToClient(msg);
+    }
     private void handleInit(Message msg){
     	int port=Integer.valueOf(msg.getValue());
     	
@@ -103,6 +106,7 @@ public class NodeListener implements Runnable{
     			}
     	}
     }
+    
 	@Override
 	public void run() {
 		
@@ -121,6 +125,9 @@ public class NodeListener implements Runnable{
 				Message msg = (Message) objInput.readObject();
 				
 				switch(msg.getMessageType()){
+				case queryAck:
+					handleQueryAck(msg);
+					break;
 				case nodeInitialization:
 					handleInit(msg);
 					break;
