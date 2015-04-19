@@ -108,6 +108,9 @@ public class NodeListener implements Runnable{
     	}
     }
     
+    private void handleWriteAck(Message msg){
+    	this.hiringServer.lb.clientServer.sendToClient(msg);
+    }
 	@Override
 	public void run() {
 		
@@ -128,6 +131,9 @@ public class NodeListener implements Runnable{
 				switch(msg.getMessageType()){
 				case queryAck:
 					handleQueryAck(msg);
+					break;
+				case writeAck:
+					handleWriteAck(msg);
 					break;
 				case nodeInitialization:
 					handleInit(msg);

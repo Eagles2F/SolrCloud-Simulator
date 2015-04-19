@@ -21,6 +21,7 @@ public class ClientMain {
 	private int writeSeqNum;
 	private int readSeqNum;
 	
+	public List<Integer> readList;
 	public List<Integer> writeAckList;
 	public List<Integer> readAckList;
 	
@@ -32,7 +33,7 @@ public class ClientMain {
 	
 	public ClientMain(){
 		this.serverPort = 11112;
-		this.serverHost = "192.168.1.4";
+		this.serverHost = "128.237.161.147";
 		this.writeAckList = new ArrayList<Integer>();
 		this.readAckList = new ArrayList<Integer>();
 		this.console = new BufferedReader(new InputStreamReader(System.in));
@@ -81,17 +82,21 @@ public class ClientMain {
 		}
 	}
 	
-	public void handleQuery(String rate, String length){
+	public void handleQuery(String startingPoint, String rate, String length){
+		int istartingPoint = Integer.valueOf(startingPoint);
 		int irate = Integer.valueOf(rate);
 		int ilength = Integer.valueOf(length);
-		System.out.println("query: "+rate + " " + length);
+		
+		System.out.println("query from "+ ilength +" at speed of "+rate + " for " + length+ "secs");
+		
 		for(int i=0;i<ilength;i++){
 			//generating the number of rate request in 1 sec
 			for(int j = 0; j<irate; j++){
 				Message  msg = new Message(MessageType.queryData);
 				msg.setSeqNum(this.readSeqNum);
-				msg.setKey(String.valueOf(this.readSeqNum));
+				msg.setKey(String.valueOf(istartingPoint+i));
 				this.sendToLB(msg);
+				
 				this.readSeqNum++;
 			}
 			
@@ -110,7 +115,7 @@ public class ClientMain {
 	
 	public void handleHelp(){
 		System.out.println("write [rate] [time_length] \n"+
-								"query [rate] [time_length] \n");
+								"query [starting point] [rate] [time_length] \n");
 	}
 	
 	public void startConsole(){
@@ -133,7 +138,7 @@ public class ClientMain {
             		handleWrite(inputLine[1],inputLine[2]);
             		break;
             	case "query":
-            		handleQuery(inputLine[1],inputLine[2]);
+            		handleQuery(inputLine[1],inputLine[2],inputLine[3]);
             		break;
             	case "quit":
             		handleQuit();
