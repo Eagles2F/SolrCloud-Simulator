@@ -113,10 +113,8 @@ public class NodeAndLeaderConn implements Runnable {
 						content = msg.getDataString();
 						bw.write(content);
 						bw.flush();
-						
-						// write to cache
-						nodeMain.writeToDataCache(msg.getKey(), msg.getValue());
-						// do we ack syn data?
+						 
+						// shouldn't write to cache as it is a replica
 					}
 					else if (msg.getMessageType() == MessageType.writeData) {
 						System.out.println("got new data from master. Let's save it to my log file ");
@@ -124,8 +122,7 @@ public class NodeAndLeaderConn implements Runnable {
 						bw.write(content);
 						bw.flush();
 						
-						// write to cache
-						nodeMain.writeToDataCache(msg.getKey(), msg.getValue());
+						// shouldn't write to cache as it is a replica
 
 						//replica doesn't send back ack to leader for writedata
 					}
