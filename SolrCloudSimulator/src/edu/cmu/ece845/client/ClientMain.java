@@ -33,7 +33,7 @@ public class ClientMain {
 	
 	public ClientMain(){
 		this.serverPort = 11112;
-		this.serverHost = "128.237.161.147";
+		this.serverHost = "localhost";
 		this.writeAckList = new ArrayList<Integer>();
 		this.readAckList = new ArrayList<Integer>();
 		this.console = new BufferedReader(new InputStreamReader(System.in));
@@ -94,9 +94,9 @@ public class ClientMain {
 			for(int j = 0; j<irate; j++){
 				Message  msg = new Message(MessageType.queryData);
 				msg.setSeqNum(this.readSeqNum);
-				msg.setKey(String.valueOf(istartingPoint+i));
+				msg.setKey(String.valueOf(istartingPoint+i*irate +j ));
 				this.sendToLB(msg);
-				
+				System.out.println("query request: "+msg.getKey() + " seqNum: "+ msg.getSeqNum());
 				this.readSeqNum++;
 			}
 			
@@ -107,6 +107,16 @@ public class ClientMain {
 				e.printStackTrace();
 			}
 		}
+		
+		try {
+			Thread.sleep(2000);
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		double success_rate = (double)(this.readAckList.size())/(double)(irate*ilength);
+		System.out.println("The success rate of this Query is:" + success_rate);
+		this.readAckList.clear();
 	}
 	
 	public void handleQuit(){
@@ -160,13 +170,15 @@ public class ClientMain {
 	public static void main(String[] args) {
 		
 		ClientMain client = new ClientMain();
-		
+		Socket soc=null;
+		ObjectOutputStream objOutput=null;
+		ObjectInputStream objInput=null;
 		try {
-			Socket soc = new Socket(client.serverHost, client.serverPort);
+			soc = new Socket(client.serverHost, client.serverPort);
 			System.out.println("Connected with server!");
 			//doing write or read request
-			ObjectOutputStream objOutput = new ObjectOutputStream(soc.getOutputStream());
-			ObjectInputStream objInput = new ObjectInputStream(soc.getInputStream());
+			objOutput = new ObjectOutputStream(soc.getOutputStream());
+			objInput = new ObjectInputStream(soc.getInputStream());
 
 			
 			client.output = objOutput;
@@ -183,6 +195,16 @@ public class ClientMain {
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
+		} finally {
+			try {
+				objOutput.close();
+				objInput.close();
+				soc.close();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			
 		}
 	}
 }

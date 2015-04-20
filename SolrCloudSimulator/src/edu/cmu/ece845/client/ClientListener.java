@@ -23,7 +23,7 @@ public class ClientListener implements Runnable {
 	}
 	
 	private void handleQueryAck(Message msg){
-		System.out.println("read request: " + msg.getSeqNum() + " has been acked successfully!");
+		System.out.println("read request: "+msg.getKey() + " seqNum: "+ msg.getSeqNum() + " has been acked successfully!");
 		this.clientMain.writeAckList.add(msg.getSeqNum());
 	}
 	

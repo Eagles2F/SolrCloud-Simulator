@@ -30,7 +30,7 @@ public class LoadBalancerMain {
 	public LoadBalancerMain(LBConfiguration lb){
 		//initialization
 		nodeHiringServer = new NodeHiringServer(lb.getNodeHiring_port(), this);
-		clientServer = new ClientServer(lb.getClientListeningPort(), this.nodeHiringServer);
+		clientServer = new ClientServer(lb.getClientListeningPort(), this.nodeHiringServer, lb.getIsQuorum());
 		console = new BufferedReader(new InputStreamReader(System.in));
 		running = true;
 	}

@@ -21,14 +21,12 @@ public class LBConfiguration extends ConfigurationBase implements Serializable{
         try {
             input = new FileInputStream("LBConfig.properties");
         } catch (FileNotFoundException e) {
-            // TODO Auto-generated catch block
             e.printStackTrace();
         }
         
         try {
             prop.load(input);
         } catch (IOException e) {
-            // TODO Auto-generated catch block
             e.printStackTrace();
         }
 	}
@@ -39,6 +37,10 @@ public class LBConfiguration extends ConfigurationBase implements Serializable{
 	
 	public int getClientListeningPort(){
 		return Integer.valueOf(prop.getProperty("clientServingPort"));
+	}
+	
+	public boolean getIsQuorum(){
+		return Boolean.valueOf(prop.getProperty("is_quorum"));
 	}
 	
 	public  Properties getProperties(){
