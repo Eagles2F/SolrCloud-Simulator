@@ -39,6 +39,9 @@ public class NodeAndLeaderConn implements Runnable {
 
 		Socket socket = null;
 		Message msg;
+		ObjectOutputStream outstream = null;
+		ObjectInputStream instream = null;
+		
 		
 		System.out.println("In NodeAndLeaderConn connection. I am the replica and I connected to master");
 		
@@ -47,8 +50,8 @@ public class NodeAndLeaderConn implements Runnable {
 				socket = new Socket(leaderIP, leaderPort);
 				
 				// initialize streams
-				ObjectOutputStream outstream =  new ObjectOutputStream(socket.getOutputStream());
-				ObjectInputStream instream = new ObjectInputStream(socket.getInputStream());	
+				 outstream =  new ObjectOutputStream(socket.getOutputStream());
+				 instream = new ObjectInputStream(socket.getInputStream());	
 				 
 	
 				String content, lastWriteId;
@@ -124,7 +127,8 @@ public class NodeAndLeaderConn implements Runnable {
 						
 						// shouldn't write to cache as it is a replica
 
-						//replica doesn't send back ack to leader for writedata
+						//replica sends back ack to leader for writedata
+						outstream.writeObject(new Message(MessageType.writeAck));
 					}
 					else {
 						// TODO: handle any other message type - shouldnt come here
@@ -140,6 +144,8 @@ public class NodeAndLeaderConn implements Runnable {
 			} finally {
 				try {
 					System.out.println(" master died 3" );
+					outstream.close();
+					instream.close();
 					socket.close();
 					bw.close();
 					System.out.println(" master died 4" );
