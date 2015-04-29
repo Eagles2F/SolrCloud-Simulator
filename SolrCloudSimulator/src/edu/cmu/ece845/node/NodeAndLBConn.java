@@ -79,6 +79,10 @@ public class NodeAndLBConn implements Runnable {
 					// Write in the hashmap for local caching
 					nodeMain.writeToDataCache(msg.getKey(), msg.getValue());
 					
+					
+					// wait before sending the data
+					
+					
 					// reply ACK for writing
 					Message m = new Message(MessageType.writeAck);
 					m.setSeqNum(msg.getSeqNum());

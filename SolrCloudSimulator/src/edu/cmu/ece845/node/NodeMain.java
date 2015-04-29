@@ -10,6 +10,7 @@ import java.io.ObjectOutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -65,12 +66,16 @@ public class NodeMain {
 	public String myPort;
 	public Thread tlb;
 	public Hashtable<String, String> dataCache;
+	public volatile ConcurrentHashMap<Integer, Integer> ackMetaData;
+	public volatile HashSet<Integer> alreadySentAck;
 	
 	public NodeMain () {
 		queueList = new ArrayList<LinkedBlockingQueue<Message>>();
 		queueHashMap = new ConcurrentHashMap<Integer, LinkedBlockingQueue<Message>>();
 		timestamp = 0;
 		dataCache = new Hashtable<String, String>();
+		ackMetaData = new ConcurrentHashMap<Integer, Integer>();
+		alreadySentAck = new HashSet<Integer>();
 	}
 	
 	public void runNodeMain(String args[]) {
@@ -177,6 +182,7 @@ public class NodeMain {
 		else {
 			tlb = new Thread(new NodeAndLBConn(this, true));
 			tlb.start();
+			new Thread(new LeaderAckManager(this)).start();
 			startServer(myPort);
 		}
 		
@@ -250,6 +256,22 @@ public class NodeMain {
 			return null;
 	}
 	
+	public void incrementAckMetaData(int writeAckId) {
+		int x;
+		synchronized (ackMetaData) {
+			if (!ackMetaData.containsKey(writeAckId)) {
+				// check if we already sent the ack. If sent already, then the new ack is delayed ack and so dont process it
+				if (!alreadySentAck.contains(writeAckId))
+					ackMetaData.put(writeAckId, 1);
+			}
+			else {
+				x = ackMetaData.get(writeAckId);
+				x++;
+				ackMetaData.put(writeAckId, x);
+			}
+		}
+		
+	}
 	public static void main(String[] args) {
 		
 		NodeMain nm = new NodeMain();

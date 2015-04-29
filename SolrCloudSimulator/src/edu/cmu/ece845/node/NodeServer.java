@@ -8,6 +8,8 @@ import java.io.ObjectOutputStream;
 import java.net.Socket;
 import java.util.concurrent.LinkedBlockingQueue;
 
+import javax.xml.ws.handler.MessageContext.Scope;
+
 import edu.cmu.ece845.utility.Message;
 import edu.cmu.ece845.utility.MessageType;
 import edu.cmu.ece845.utility.TuneableVars;
@@ -120,6 +122,12 @@ public class NodeServer implements Runnable {
 			
 			// write the data to replica
 			outstream.writeObject(msg);
+			
+			// read the ack message from the replica and increment the hashMap
+			Message m = (Message) instream.readObject();
+			int writeAckSeq = m.getSeqNum();
+			nodeMain.incrementAckMetaData(writeAckSeq);
+			
 		}
 		
 		} catch (IOException | InterruptedException | ClassNotFoundException e) {
@@ -129,6 +137,13 @@ public class NodeServer implements Runnable {
 			System.out.println("Thread died. This thread was of the leader and replica id: " + replicaid + " was connected to it");
 			nodeMain.queueList.remove(localQueue);
 			nodeMain.queueHashMap.remove(replicaid);
-		}
+			try {
+				instream.close();
+				outstream.close();
+				socket.close();
+			} catch (IOException e1) {
+				System.out.println("socket close error");
+			}
+ 		}
 	}
 }

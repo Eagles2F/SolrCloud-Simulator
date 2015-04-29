@@ -127,8 +127,10 @@ public class NodeAndLeaderConn implements Runnable {
 						
 						// shouldn't write to cache as it is a replica
 
-						//replica sends back ack to leader for writedata
-						outstream.writeObject(new Message(MessageType.writeAck));
+						//replica sends back ack to leader for writedata for that sequence number
+						Message ms= new Message(MessageType.writeAck);
+						ms.setSeqNum(msg.getSeqNum());
+						outstream.writeObject(ms);
 					}
 					else {
 						// TODO: handle any other message type - shouldnt come here
