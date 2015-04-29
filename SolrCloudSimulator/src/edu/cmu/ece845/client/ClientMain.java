@@ -33,7 +33,7 @@ public class ClientMain {
 	
 	public ClientMain(){
 		this.serverPort = 11112;
-		this.serverHost = "128.237.161.147";
+		this.serverHost = "localhost";
 		this.writeAckList = new ArrayList<Integer>();
 		this.readAckList = new ArrayList<Integer>();
 		this.console = new BufferedReader(new InputStreamReader(System.in));

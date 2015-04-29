@@ -80,13 +80,12 @@ public class NodeAndLBConn implements Runnable {
 					nodeMain.writeToDataCache(msg.getKey(), msg.getValue());
 					
 					
-					// wait before sending the data
+					// sending ack form the other thread
 					
-					
-					// reply ACK for writing
-					Message m = new Message(MessageType.writeAck);
-					m.setSeqNum(msg.getSeqNum());
-					nodeMain.outstream.writeObject(m);
+					// dead code
+				//	Message m = new Message(MessageType.writeAck);
+				//	m.setSeqNum(msg.getSeqNum());
+				//	nodeMain.outstream.writeObject(m);
 					
 					
 				} else if (isLeader && msg.getMessageType() == MessageType.queryData) {

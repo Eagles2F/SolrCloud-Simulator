@@ -32,6 +32,7 @@ public class LeaderAckManager implements Runnable {
 				    	Message m = new Message(MessageType.writeAck);
 				    	m.setSeqNum(key);
 				    	try {
+				    		System.out.println("removed key: " + key + " from hashmap and sending ack");
 				    	nodeMain.outstream.writeObject(m);
 				    	} catch (IOException e) {
 				    		e.printStackTrace();
