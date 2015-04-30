@@ -8,7 +8,9 @@ import java.io.ObjectOutputStream;
 import java.net.Socket;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.concurrent.ConcurrentHashMap;
 
 import edu.cmu.ece845.utility.Message;
 import edu.cmu.ece845.utility.MessageType;
@@ -22,8 +24,10 @@ public class ClientMain {
 	private int readSeqNum;
 	
 	public List<Integer> readList;
-	public List<Integer> writeAckList;
 	public List<Integer> readAckList;
+	
+	public ConcurrentHashMap<Integer, Long> writeAckTimestamp;
+	public ConcurrentHashMap<Integer, Long> writeTimestamp;
 	
 	private BufferedReader console;
 	
@@ -34,8 +38,11 @@ public class ClientMain {
 	public ClientMain(){
 		this.serverPort = 11112;
 		this.serverHost = "localhost";
-		this.writeAckList = new ArrayList<Integer>();
 		this.readAckList = new ArrayList<Integer>();
+		
+		this.writeAckTimestamp = new ConcurrentHashMap<Integer,Long>();
+		this.writeTimestamp = new ConcurrentHashMap<Integer, Long>();
+		
 		this.console = new BufferedReader(new InputStreamReader(System.in));
 		this.writeSeqNum = 0;
 		this.readSeqNum = 0;
@@ -58,27 +65,19 @@ public class ClientMain {
 		}
 	}
 	
-	public void handleWrite(String rate, String length){// rate in req/sec, length in sec
-		int irate = Integer.valueOf(rate);
-		int ilength = Integer.valueOf(length);
-		System.out.println("write: "+rate + " " + length);
-		for(int i=0;i<ilength;i++){
-			//generating the number of rate request in 1 sec
-			for(int j = 0; j<irate; j++){
-				Message  msg = new Message(MessageType.writeData);
-				msg.setSeqNum(this.writeSeqNum);
-				msg.setKey(String.valueOf(this.writeSeqNum));
-				msg.setValue(String.valueOf(this.writeSeqNum));
-				this.sendToLB(msg);
-				this.writeSeqNum++;
-			}
+	public void handleWrite(String size){// rate in req/sec, length in sec
+		int isize = Integer.valueOf(size);
+		System.out.println("write: "+size);
+		for(int i=0;i<isize;i++){
+			Message  msg = new Message(MessageType.writeData);
+			msg.setSeqNum(this.writeSeqNum);
+			msg.setKey(String.valueOf(this.writeSeqNum));
+			msg.setValue(String.valueOf(this.writeSeqNum));
 			
-			try {
-				Thread.sleep(1000);
-			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
+			this.writeTimestamp.put(this.writeSeqNum, System.currentTimeMillis());
+			System.out.println("write " + this.writeSeqNum + " at " + System.currentTimeMillis() + " ms");
+			this.sendToLB(msg);
+			this.writeSeqNum++;
 		}
 	}
 	
@@ -135,7 +134,7 @@ public class ClientMain {
            
             switch(inputLine[0]){
             	case "write":
-            		handleWrite(inputLine[1],inputLine[2]);
+            		handleWrite(inputLine[1]);
             		break;
             	case "query":
             		handleQuery(inputLine[1],inputLine[2],inputLine[3]);

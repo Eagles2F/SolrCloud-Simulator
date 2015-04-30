@@ -1,5 +1,6 @@
 package edu.cmu.ece845.client;
 
+import java.io.EOFException;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 
@@ -18,13 +19,13 @@ public class ClientListener implements Runnable {
 	}
 	
 	private void handleWriteAck(Message msg){
-		System.out.println("write request: " + msg.getSeqNum() + " has been acked successfully!");
-		this.clientMain.writeAckList.add(msg.getSeqNum());
+		System.out.println("write request: " + msg.getSeqNum() + " has been acked successfully! at " + System.currentTimeMillis() + "ms");
+		this.clientMain.writeAckTimestamp.put(msg.getSeqNum(), System.currentTimeMillis());
 	}
 	
 	private void handleQueryAck(Message msg){
 		System.out.println("read request: " + msg.getSeqNum() + " has been acked successfully!");
-		this.clientMain.writeAckList.add(msg.getSeqNum());
+		this.clientMain.readAckList.add(msg.getSeqNum());
 	}
 	
 	@Override
@@ -44,7 +45,10 @@ public class ClientListener implements Runnable {
 				default:
 					break;
 			}
-		} catch (ClassNotFoundException | IOException e) {
+		} catch (EOFException e){
+			return ;
+		}
+		catch (ClassNotFoundException | IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
