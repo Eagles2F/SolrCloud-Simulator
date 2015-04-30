@@ -1,5 +1,6 @@
 package edu.cmu.ece845.loadbalancer;
 
+import java.io.EOFException;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -25,23 +26,27 @@ public class ClientServer implements Runnable{
 	private ObjectInputStream objInput;
 	private ObjectOutputStream objOutput;
 	
-	public ClientServer(int port, NodeHiringServer server){
+	public volatile boolean is_quorum;
+	
+	public ClientServer(int port, NodeHiringServer server, boolean is_q){
 		this.portNum = port;
 		this.running = true;
 		this.nodeServer = server;
+		this.is_quorum = is_q;
 	}
 	@Override
 	public void run() {
 		System.out.println("ClientServer starts to listen on port:" + this.portNum);
+		
+		ServerSocket server;
 		try {
-			ServerSocket server = new ServerSocket(this.portNum);
-			
-			this.clientSoc = server.accept();
-			System.out.println("Client joined!");
-			listenToClient();
-			
+			server = new ServerSocket(this.portNum);
+			while(running){	
+				this.clientSoc = server.accept();
+				System.out.println("Client joined!");
+				listenToClient();
+			} 
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
@@ -66,10 +71,11 @@ public class ClientServer implements Runnable{
 				}
 			}
 			
+		} catch (EOFException e1){
+			return;
 		} catch (IOException e) {
-			e.printStackTrace();
+			e.printStackTrace();		
 		} catch (ClassNotFoundException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		
@@ -77,13 +83,28 @@ public class ClientServer implements Runnable{
 	
 	private void handleWrite(Message msg){
 		//read key and send the write request to the leader node
-		System.out.println("write request: " + msg.getSeqNum() + " key:" + msg.getKey()
-				+ " value " + msg.getValue());
-		try {
-			this.nodeServer.nodeListenerMap.get(this.nodeServer.masterID).sendToNode(msg);
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+		if(this.is_quorum){
+			try {
+				if(this.nodeServer.nodeStatusMap.entrySet().size() > 1){
+				System.out.println("write request: " + msg.getSeqNum() + " key:" + msg.getKey()
+						+ " value " + msg.getValue());
+					this.nodeServer.nodeListenerMap.get(this.nodeServer.masterID).sendToNode(msg);
+				}else {
+					System.out.println("write request: "+ msg.getSeqNum() +" get rejected due to lack of Quorum!");
+				}
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		} else{
+			System.out.println("write request: " + msg.getSeqNum() + " key:" + msg.getKey()
+					+ " value " + msg.getValue());
+				try {
+					this.nodeServer.nodeListenerMap.get(this.nodeServer.masterID).sendToNode(msg);
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
 		}
 	}
 	
