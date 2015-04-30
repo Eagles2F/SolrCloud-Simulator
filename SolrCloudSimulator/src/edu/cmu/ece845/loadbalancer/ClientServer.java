@@ -1,5 +1,6 @@
 package edu.cmu.ece845.loadbalancer;
 
+import java.io.EOFException;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -25,38 +26,28 @@ public class ClientServer implements Runnable{
 	private ObjectInputStream objInput;
 	private ObjectOutputStream objOutput;
 	
-	private boolean is_quorum;
+	public volatile boolean is_quorum;
 	
 	public ClientServer(int port, NodeHiringServer server, boolean is_q){
 		this.portNum = port;
 		this.running = true;
 		this.nodeServer = server;
-		this.objInput = null;
-		this.objOutput = null;
-		this.clientSoc = null;
 		this.is_quorum = is_q;
 	}
 	@Override
 	public void run() {
 		System.out.println("ClientServer starts to listen on port:" + this.portNum);
-		ServerSocket server = null;
+		
+		ServerSocket server;
 		try {
 			server = new ServerSocket(this.portNum);
-			
-			this.clientSoc = server.accept();
-			System.out.println("Client joined!");
-			listenToClient();
-			
+			while(running){	
+				this.clientSoc = server.accept();
+				System.out.println("Client joined!");
+				listenToClient();
+			} 
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
-		} finally {
-			try {
-				server.close();
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
 		}
 	}
 	
@@ -80,21 +71,12 @@ public class ClientServer implements Runnable{
 				}
 			}
 			
+		} catch (EOFException e1){
+			return;
 		} catch (IOException e) {
-			e.printStackTrace();
-			
+			e.printStackTrace();		
 		} catch (ClassNotFoundException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
-		} finally {
-			try {
-				this.objInput.close();
-				this.objOutput.close();
-				this.clientSoc.close();
-			} catch (IOException e1) {
-				// TODO Auto-generated catch block
-				e1.printStackTrace();
-			}
 		}
 		
 	}

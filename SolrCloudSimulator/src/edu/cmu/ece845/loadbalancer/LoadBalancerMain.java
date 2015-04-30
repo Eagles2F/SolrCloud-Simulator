@@ -79,14 +79,22 @@ public class LoadBalancerMain {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
-            		
+					break;
+            	case "quorum":
+            		handleQuorum(inputLine[1]);
             		break;
                 default:
                     System.out.println(inputLine[0]+" is not a valid command");
             }
         }
 	}
-
+	private void handleQuorum(String on_off){
+		if(on_off.equals("on")){
+			this.clientServer.is_quorum = true;
+		}else if(on_off.equals("off")){
+			this.clientServer.is_quorum = false;
+		}
+	}
 	private void handleWrite(String key, String value){
 		Message msg = new Message(MessageType.writeData);
 		msg.setKey(key);
