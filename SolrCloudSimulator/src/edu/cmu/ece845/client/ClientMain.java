@@ -67,6 +67,12 @@ public class ClientMain {
 		}
 	}
 	
+	public void handleClear(){
+		this.writeAckTimestamp.clear();
+		this.writeTimestamp.clear();
+		this.writeSeqNum = 0;
+	}
+	
 	public void handleWritePerformance(){
 		List<Integer> latency_list = new ArrayList<Integer>();
 		Set<Integer> s = this.writeAckTimestamp.keySet();
@@ -180,6 +186,9 @@ public class ClientMain {
             		break;
             	case "writeperformance":
             		handleWritePerformance();
+            		break;
+            	case "clear":
+            		handleClear();
             		break;
                 default:
                     System.out.println(inputLine[0]+"is not a valid command");
