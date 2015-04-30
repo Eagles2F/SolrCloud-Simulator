@@ -10,6 +10,7 @@ import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 import edu.cmu.ece845.utility.Message;
@@ -66,6 +67,27 @@ public class ClientMain {
 		}
 	}
 	
+	public void handleWritePerformance(){
+		List<Integer> latency_list = new ArrayList<Integer>();
+		Set<Integer> s = this.writeAckTimestamp.keySet();
+		for(Integer k: s){
+			long acktime = this.writeAckTimestamp.get(k);
+			long sendtime = this.writeTimestamp.get(k);
+			
+			int latency = (int) (acktime - sendtime);
+			latency_list.add(latency);
+			
+			System.out.println("write req:" + k + " has latency: " + latency);
+		}
+		int sum=0;
+		for(int i =0; i < latency_list.size(); i++){
+			sum+=latency_list.get(i);
+		}
+		double average = (double)sum / latency_list.size();
+		
+		System.out.println("The average latency until now is: " + average);
+ 	}
+	
 	public void handleWrite(String size){// rate in req/sec, length in sec
 		int isize = Integer.valueOf(size);
 		System.out.println("write: "+size);
@@ -79,7 +101,7 @@ public class ClientMain {
 			System.out.println("write " + this.writeSeqNum + " at " + System.currentTimeMillis() + " ms");
 			this.sendToLB(msg);
 			this.writeSeqNum++;
-		}
+		}		
 	}
 	
 	public void handleQuery(String startingPoint, String rate, String length){
@@ -124,7 +146,7 @@ public class ClientMain {
 	}
 	
 	public void handleHelp(){
-		System.out.println("write [rate] [time_length] \n"+
+		System.out.println("write [size] \n"+
 								"query [starting point] [rate] [time_length] \n");
 	}
 	
@@ -155,6 +177,9 @@ public class ClientMain {
             		break;
             	case "help":
             		handleHelp();
+            		break;
+            	case "writeperformance":
+            		handleWritePerformance();
             		break;
                 default:
                     System.out.println(inputLine[0]+"is not a valid command");

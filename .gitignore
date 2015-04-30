@@ -2,3 +2,4 @@ bin/
 build/
 .settings
 .metadata
+SolrCloudSimulator/logfile_990*.txt
